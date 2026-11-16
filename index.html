@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudienceLens — Great Films Ranked by Audience Votes</title>
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    /* -------------------------------------------------------------
+       HOME PAGE STYLES & ASYMMETRIC RHYTHM
+       ------------------------------------------------------------- */
+
+    /* Section spacing rhythm: varied (64px, 40px, 48px) */
+    .home-hero-section {
+      padding: var(--space-6) 0 var(--space-5) 0;
+      border-bottom: var(--border-hairline);
+    }
+
+    .home-grid-hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+      align-items: start;
+    }
+
+    @media (min-width: 960px) {
+      .home-grid-hero {
+        grid-template-columns: 1.15fr 1fr;
+        gap: var(--space-6);
+      }
+    }
+
+    /* Left Hero Column: Left-aligned, editorial clarity */
+    .hero-editorial {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .hero-main-headline {
+      font-family: var(--font-serif);
+      font-size: var(--text-4xl);
+      line-height: var(--leading-tight);
+      color: var(--color-paper);
+      margin: 0;
+      letter-spacing: var(--tracking-tight);
+      max-width: 600px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-main-headline {
+        font-size: var(--text-5xl);
+      }
+    }
+
+    .hero-subline {
+      font-size: var(--text-base);
+      color: var(--color-paper-muted);
+      line-height: var(--leading-relaxed);
+      max-width: 520px;
+      margin: 0;
+    }
+
+    .hero-primary-action {
+      display: inline-flex;
+      align-self: flex-start;
+      margin-top: var(--space-2);
+    }
+
+    /* Right Hero Column: Top 10 Right Now */
+    .hero-top10-tray {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .hero-top10-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: var(--border-subtle);
+      padding-bottom: var(--space-2);
+    }
+
+    .top10-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .top10-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 6px 10px;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .top10-row:hover {
+      border-color: var(--color-accent);
+      background-color: var(--color-surface-raised);
+    }
+
+    .top10-rank {
+      width: 32px;
+      flex-shrink: 0;
+    }
+
+    .top10-info {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow: hidden;
+    }
+
+    .top10-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-paper);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top10-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-paper-dim);
+    }
+
+    .top10-rating {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-accent);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 2: WHY 45 VOTES DOESN'T OUTRANK 2 MILLION
+       ------------------------------------------------------------- */
+    .ranking-note-section {
+      padding: var(--space-5) 0;
+      border-bottom: var(--border-hairline);
+    }
+
+    .ranking-note-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      border-left: 3px solid var(--color-accent);
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      max-width: 820px;
+    }
+
+    .ranking-note-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-xl);
+      color: var(--color-paper);
+      margin: 0;
+    }
+
+    .ranking-note-text {
+      font-size: var(--text-sm);
+      color: var(--color-paper-muted);
+      line-height: var(--leading-relaxed);
+      margin: 0;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 3: ASYMMETRIC DESTINATION CARDS (VARIED SIZES)
+       ------------------------------------------------------------- */
+    .destination-section {
+      padding: var(--space-5) 0 var(--space-6) 0;
+    }
+
+    .destination-asym-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-3);
+    }
+
+    @media (min-width: 960px) {
+      .destination-asym-grid {
+        grid-template-columns: 1.5fr 1.1fr 0.9fr;
+        align-items: stretch;
+      }
+    }
+
+    .destination-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-4);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+      position: relative;
+    }
+
+    .destination-card:hover {
+      border-color: var(--color-accent);
+      background-color: var(--color-surface-raised);
+    }
+
+    .dest-wide {
+      border-left: 3px solid var(--color-accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- 4% film grain overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Shared Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand">
+        <span class="site-wordmark">AudienceLens</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="site-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link active" aria-current="page">Home</a>
+        <a href="movies.html" class="nav-link">Movies</a>
+        <a href="recommendations.html" class="nav-link">Recommendations</a>
+        <a href="wishlist.html" class="nav-link">Wishlist</a>
+      </nav>
+
+      <!-- Mobile Navigation Toggle (< 720px) -->
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+      <a href="index.html" class="mobile-nav-link active">Home</a>
+      <a href="movies.html" class="mobile-nav-link">Movies</a>
+      <a href="recommendations.html" class="mobile-nav-link">Recommendations</a>
+      <a href="wishlist.html" class="mobile-nav-link">Wishlist</a>
+    </div>
+  </header>
+
+  <!-- Main Surface -->
+  <main class="site-main">
+
+    <!-- =============================================================
+         SECTION 1: HERO AND TOP 10 LIST
+         ============================================================= -->
+    <section class="home-hero-section">
+      <div class="home-grid-hero">
+        
+        <!-- Left Hero Column: Editorial Point of View -->
+        <div class="hero-editorial">
+          <div class="eyebrow eyebrow-accent">
+            THIS WEEK'S BEST FILMS
+          </div>
+
+          <h1 class="hero-main-headline">
+            Ranked by audience votes, not vibes.
+          </h1>
+
+          <p class="hero-subline">
+            Find great films worth your evening, ranked by real audience votes rather than marketing hype. Honest recommendations across 120 of cinema's finest releases.
+          </p>
+
+          <!-- Exactly ONE primary link (NOT centered, NOT two buttons) -->
+          <div class="hero-primary-action">
+            <a href="movies.html" class="btn-primary btn-lg">
+              <span>Browse all films &rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Hero Column: Top 10 Right Now -->
+        <div class="hero-top10-tray" aria-label="Top 10 Right Now">
+          <div class="hero-top10-header">
+            <div>
+              <div style="font-family: var(--font-serif); font-size: var(--text-base); color: var(--color-paper); font-weight: 600;">
+                Top 10 right now
+              </div>
+              <div style="font-size: 11px; color: var(--color-paper-muted); margin-top: 2px;">
+                Highest rated by audiences
+              </div>
+            </div>
+          </div>
+
+          <ul class="top10-list" id="heroTop10Container">
+            <!-- Populated dynamically -->
+            <li class="top10-row">
+              <span class="font-mono" style="font-size: 11px; color: var(--color-paper-dim);">Loading films...</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =============================================================
+         SECTION 2: WHY 45 VOTES DOESN'T OUTRANK 2 MILLION
+         ============================================================= -->
+    <section class="ranking-note-section">
+      <div class="ranking-note-card">
+        <div class="eyebrow eyebrow-accent">HOW OUR RATINGS WORK</div>
+        <h2 class="ranking-note-title">Why a film with 45 votes doesn't outrank one with 2 million</h2>
+        <p class="ranking-note-text">
+          A film with a handful of five-star reviews might look perfect at first glance, but it hasn't stood the test of a wider audience. We balance average ratings against total vote volume so established classics aren't knocked off the list by low-sample flukes. The more people who love a film, the more confident we can be that it's worth your evening.
+        </p>
+      </div>
+    </section>
+
+    <!-- =============================================================
+         SECTION 3: DESTINATION CARDS (VARIED SIZES)
+         ============================================================= -->
+    <section class="destination-section">
+      <div class="eyebrow eyebrow-accent">WHERE TO NEXT</div>
+      <h2 style="font-family: var(--font-serif); font-size: var(--text-2xl); color: var(--color-paper); margin-top: 2px; margin-bottom: var(--space-3);">
+        Explore AudienceLens
+      </h2>
+
+      <!-- Varied sizes: 1.5fr wide card, 1.1fr medium card, 0.9fr compact stub -->
+      <div class="destination-asym-grid">
+        
+        <!-- CARD 1: LARGE / WIDE (Browse all films) -->
+        <a href="movies.html" class="destination-card dest-wide">
+          <div>
+            <div class="eyebrow" style="font-size: 9px; color: var(--color-accent);">120 FILMS</div>
+            <h3 style="font-family: var(--font-serif); font-size: var(--text-2xl); color: var(--color-paper); margin-top: 4px;">
+              Browse all films
+            </h3>
+            <p style="font-size: var(--text-sm); color: var(--color-paper-muted); margin-top: var(--space-2); line-height: var(--leading-relaxed);">
+              Search, filter by genre and year, and sort 120 of cinema's best films by rating or release date.
+            </p>
+          </div>
+          
+          <div style="display: flex; justify-content: flex-end; align-items: center; border-top: var(--border-subtle); padding-top: var(--space-3);">
+            <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-accent); font-weight: 700;">Browse films &rarr;</span>
+          </div>
+        </a>
+
+        <!-- CARD 2: MEDIUM (Get recommendations) -->
+        <a href="recommendations.html" class="destination-card">
+          <div>
+            <div class="eyebrow" style="font-size: 9px;">CURATED PICKS</div>
+            <h3 style="font-family: var(--font-serif); font-size: var(--text-xl); color: var(--color-paper); margin-top: 4px;">
+              Get recommendations
+            </h3>
+            <p style="font-size: var(--text-xs); color: var(--color-paper-muted); margin-top: var(--space-2); line-height: 1.5;">
+              See the best films for your taste and rate what you've seen to tune your list.
+            </p>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; align-items: center; border-top: var(--border-subtle); padding-top: var(--space-3);">
+            <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-accent); font-weight: 700;">See picks &rarr;</span>
+          </div>
+        </a>
+
+        <!-- CARD 3: COMPACT (Your watchlist) -->
+        <a href="wishlist.html" class="destination-card">
+          <div>
+            <div class="eyebrow" style="font-size: 9px;">SAVED LIST</div>
+            <h3 style="font-family: var(--font-serif); font-size: var(--text-lg); color: var(--color-paper); margin-top: 4px;">
+              Your watchlist
+            </h3>
+            <p style="font-size: var(--text-xs); color: var(--color-paper-muted); margin-top: var(--space-2); line-height: 1.5;">
+              Save films for later and pick what to watch next from your queue.
+            </p>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; align-items: center; border-top: var(--border-subtle); padding-top: var(--space-3);">
+            <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-accent); font-weight: 700;">Open watchlist &rarr;</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        AudienceLens — Ranked by audience votes.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script type="module">
+    import { loadMovies } from './js/store.js';
+    import { heapTopK, createMovieComparator } from './algorithms.js';
+
+    // State
+    let allMovies = [];
+
+    // DOM Elements
+    const heroTop10Container = document.getElementById('heroTop10Container');
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const mobileNavDrawer = document.getElementById('mobileNavDrawer');
+
+    // Mobile nav toggle
+    if (mobileNavToggle && mobileNavDrawer) {
+      mobileNavToggle.addEventListener('click', () => {
+        const isOpen = mobileNavToggle.classList.toggle('open');
+        mobileNavDrawer.classList.toggle('open', isOpen);
+        mobileNavToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+
+    /**
+     * Top 10 list computed by the ranking selector behind the scenes
+     */
+    function renderHeroTop10(movies) {
+      const comparator = createMovieComparator('score');
+      const res = heapTopK(movies, 10, comparator);
+      const top10 = res.topK;
+
+      heroTop10Container.innerHTML = '';
+      top10.forEach((m, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <a href="movies.html" class="top10-row">
+            <span class="top10-rank font-mono" style="font-size: var(--text-base); font-weight: 800; color: ${idx === 0 ? 'var(--color-accent)' : 'var(--color-paper-dim)'};">
+              ${String(idx + 1).padStart(2, '0')}
+            </span>
+            <div class="top10-info">
+              <span class="top10-title">${m.title}</span>
+              <span class="top10-meta">${m.year} &bull; ${m.director}</span>
+            </div>
+            <span class="top10-rating">${Number(m.score).toFixed(1)} &#9733;</span>
+          </a>
+        `;
+        heroTop10Container.appendChild(li);
+      });
+    }
+
+    // Bootstrapping
+    async function init() {
+      try {
+        const { movies } = await loadMovies('./data/movies.json');
+        allMovies = movies;
+        renderHeroTop10(allMovies);
+      } catch (err) {
+        console.error('Failed to initialize home page:', err);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudienceLens — Recommendations &amp; Top Picks</title>
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    /* -------------------------------------------------------------
+       RECOMMENDATIONS PAGE STYLES
+       ------------------------------------------------------------- */
+
+    .recs-intro {
+      padding: var(--space-5) 0 var(--space-4) 0;
+      border-bottom: var(--border-hairline);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .recs-headline {
+      font-family: var(--font-serif);
+      font-size: var(--text-3xl);
+      color: var(--color-paper);
+      margin: 0;
+    }
+
+    @media (min-width: 768px) {
+      .recs-headline {
+        font-size: var(--text-4xl);
+      }
+    }
+
+    .recs-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-paper-muted);
+      max-width: 720px;
+      line-height: var(--leading-relaxed);
+      margin: 0;
+    }
+
+    /* Controls Panel */
+    .recs-controls-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-4);
+      margin-top: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .controls-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .show-count-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .show-count-btn {
+      padding: 4px 12px;
+      border: var(--border-hairline);
+      background-color: var(--color-surface-sunken);
+      color: var(--color-paper-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .show-count-btn:hover {
+      border-color: var(--color-paper);
+      color: var(--color-paper);
+    }
+
+    .show-count-btn.active {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    /* Genre Chips */
+    .genre-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 4px;
+    }
+
+    .genre-chip {
+      padding: 4px 10px;
+      border: var(--border-hairline);
+      background: var(--color-surface-sunken);
+      color: var(--color-paper-muted);
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+      transition: all var(--transition-fast);
+    }
+
+    .genre-chip:hover {
+      border-color: var(--color-paper);
+      color: var(--color-paper);
+    }
+
+    .genre-chip.active {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    /* Friendly count note */
+    .collection-count-note {
+      font-size: var(--text-xs);
+      color: var(--color-paper-muted);
+      font-style: italic;
+      padding: 6px 12px;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-subtle);
+      border-left: 2px solid var(--color-accent);
+      margin-top: var(--space-3);
+    }
+
+    /* Full Width Ranked List Container */
+    .ranked-list-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+
+    /* Common Card Styling */
+    .ranked-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-4);
+      display: flex;
+      gap: var(--space-4);
+      position: relative;
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+    }
+
+    .ranked-card:hover {
+      border-color: var(--color-accent);
+      background-color: var(--color-surface-raised);
+    }
+
+    /* Rank Numeral: Consistent Crisp Amber Outline */
+    .rank-outline {
+      font-family: var(--font-serif);
+      font-weight: 800;
+      -webkit-text-stroke: 1.5px var(--color-accent);
+      color: transparent;
+      line-height: 1;
+      user-select: none;
+    }
+
+    /* TOP 3 FEATURED CARDS */
+    .ranked-card.card-top3 {
+      padding: var(--space-5);
+      border-left: 3px solid var(--color-accent);
+      align-items: stretch;
+    }
+
+    .top3-rank-col {
+      min-width: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .top3-poster-thumb {
+      width: 80px;
+      aspect-ratio: 2 / 3;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 6px;
+      box-sizing: border-box;
+      margin-top: 6px;
+    }
+
+    .top3-poster-title {
+      font-family: var(--font-serif);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-paper);
+      line-height: 1.2;
+    }
+
+    .top3-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    .top3-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .top3-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-2xl);
+      color: var(--color-paper);
+      margin: 0;
+      line-height: var(--leading-tight);
+    }
+
+    .top3-meta {
+      font-size: var(--text-xs);
+      color: var(--color-paper-muted);
+      margin-top: 4px;
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .top3-synopsis {
+      font-size: var(--text-sm);
+      color: var(--color-paper-muted);
+      line-height: var(--leading-relaxed);
+      margin: 0;
+      max-width: 760px;
+    }
+
+    /* COMPACT CARDS (Ranks 4+) */
+    .ranked-card.card-compact {
+      padding: var(--space-3) var(--space-4);
+      align-items: center;
+    }
+
+    .compact-rank-col {
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compact-poster-thumb {
+      width: 44px;
+      height: 60px;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px;
+      font-size: 9px;
+      font-family: var(--font-serif);
+      color: var(--color-paper-dim);
+      line-height: 1.1;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+
+    .compact-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .compact-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-paper);
+      margin: 0;
+    }
+
+    .compact-meta {
+      font-size: var(--text-xs);
+      color: var(--color-paper-dim);
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Actions and Rating Bar */
+    .card-actions-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      border-top: var(--border-subtle);
+      padding-top: var(--space-2);
+      margin-top: 4px;
+    }
+
+    .card-compact .card-actions-strip {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+      justify-content: flex-end;
+      gap: var(--space-4);
+    }
+
+    .audience-rating-val {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-accent);
+      white-space: nowrap;
+    }
+
+    /* 5-STAR RATING CONTROL (Half-stars allowed, 1-10 scale) */
+    .star-rating-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .star-control-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-paper-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      white-space: nowrap;
+    }
+
+    .stars-picker-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .star-btn-segment {
+      width: 16px;
+      height: 18px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--color-border-strong);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .star-btn-segment svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .star-btn-segment.active-star,
+    .star-btn-segment.hover-star {
+      color: var(--color-accent);
+    }
+
+    .rated-text-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-accent);
+      background-color: var(--color-surface-sunken);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .rating-toast-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-paper-muted);
+      margin-left: 4px;
+    }
+
+    /* Wishlist Save Button */
+    .btn-wishlist {
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border: var(--border-hairline);
+      background: transparent;
+      color: var(--color-paper-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-wishlist:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-accent-subtle);
+    }
+
+    .btn-wishlist.in-wishlist {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    /* Show 10 More Button Tray */
+    .show-more-tray {
+      margin-top: var(--space-5);
+      padding: var(--space-4) 0;
+      border-top: var(--border-hairline);
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Responsive Stacking at 360px */
+    @media (max-width: 600px) {
+      .ranked-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-3);
+      }
+
+      .ranked-card.card-compact {
+        align-items: stretch;
+      }
+
+      .top3-rank-col, .compact-rank-col {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+
+      .top3-poster-thumb, .compact-poster-thumb {
+        display: none;
+      }
+
+      .card-actions-strip,
+      .card-compact .card-actions-strip {
+        flex-direction: column;
+        align-items: flex-start;
+        border-top: var(--border-subtle);
+        padding-top: var(--space-2);
+        margin-top: var(--space-2);
+        gap: var(--space-2);
+        width: 100%;
+      }
+
+      .star-rating-control {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 4% film grain overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Shared Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand">
+        <span class="site-wordmark">AudienceLens</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="site-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="movies.html" class="nav-link">Movies</a>
+        <a href="recommendations.html" class="nav-link active" aria-current="page">Recommendations</a>
+        <a href="wishlist.html" class="nav-link">Wishlist</a>
+      </nav>
+
+      <!-- Mobile Navigation Toggle (< 720px) -->
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="movies.html" class="mobile-nav-link">Movies</a>
+      <a href="recommendations.html" class="mobile-nav-link active">Recommendations</a>
+      <a href="wishlist.html" class="mobile-nav-link">Wishlist</a>
+    </div>
+  </header>
+
+  <!-- Main Content Surface -->
+  <main class="site-main">
+
+    <!-- Page Header -->
+    <section class="recs-intro">
+      <div class="eyebrow eyebrow-accent">TOP PICKS</div>
+      <h1 class="recs-headline">What to watch next.</h1>
+      <p class="recs-subtitle">
+        The best-loved films, ranked by audience votes. Rate what you've seen and the list adjusts.
+      </p>
+    </section>
+
+    <!-- Controls Panel: Show Count + Genres -->
+    <section class="recs-controls-card">
+      <div class="controls-top-row">
+        <div class="show-count-group">
+          <span class="form-label" style="margin-bottom: 0; margin-right: 6px;">Show</span>
+          <button type="button" class="show-count-btn active" data-count="10">10</button>
+          <button type="button" class="show-count-btn" data-count="20">20</button>
+          <button type="button" class="show-count-btn" data-count="30">30</button>
+        </div>
+
+        <div id="selectionStatusText" class="font-mono" style="font-size: var(--text-xs); color: var(--color-paper-muted);">
+          Showing Top 10
+        </div>
+      </div>
+
+      <!-- Genre Filter Chips -->
+      <div style="margin-top: var(--space-2);">
+        <div class="form-label" style="margin-bottom: 6px;">Genre</div>
+        <div class="genre-chips-wrap" id="genreChipsContainer" role="group" aria-label="Filter by Genre">
+          <!-- Dynamically populated chips -->
+        </div>
+      </div>
+
+      <!-- Note if fewer films than limit -->
+      <div id="subsetNoteContainer" style="display: none;"></div>
+    </section>
+
+    <!-- Full-Width Ranked List -->
+    <div class="ranked-list-wrap" id="rankedListContainer" role="feed" aria-label="Top Pick Movies List">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Show 10 More Tray -->
+    <div class="show-more-tray" id="showMoreTray">
+      <button class="btn-secondary" id="showMoreBtn">
+        <span>Show 10 more</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        AudienceLens — Ranked by audience votes.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script type="module">
+    import { loadMovies, wishlist, userRatings } from './js/store.js';
+    import {
+      MaxHeap,
+      heapTopK,
+      mergeSort,
+      createMovieComparator,
+      computeWeightedRating
+    } from './algorithms.js';
+
+    // State
+    let allMovies = [];
+    let filteredMovies = [];
+    let currentK = 10;
+    let selectedGenre = 'ALL';
+    let activeHeapInstance = null;
+
+    // DOM Elements
+    const genreChipsContainer = document.getElementById('genreChipsContainer');
+    const rankedListContainer = document.getElementById('rankedListContainer');
+    const subsetNoteContainer = document.getElementById('subsetNoteContainer');
+    const selectionStatusText = document.getElementById('selectionStatusText');
+    const showCountBtns = document.querySelectorAll('.show-count-btn');
+    const showMoreBtn = document.getElementById('showMoreBtn');
+    const showMoreTray = document.getElementById('showMoreTray');
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const mobileNavDrawer = document.getElementById('mobileNavDrawer');
+
+    // Mobile nav toggle
+    if (mobileNavToggle && mobileNavDrawer) {
+      mobileNavToggle.addEventListener('click', () => {
+        const isOpen = mobileNavToggle.classList.toggle('open');
+        mobileNavDrawer.classList.toggle('open', isOpen);
+        mobileNavToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+
+    /**
+     * Set up Genre chips with Title Case and wrap.
+     */
+    function setupGenres(movies) {
+      const genres = new Set();
+      movies.forEach(m => {
+        (m.genres || m.genre || []).forEach(g => genres.add(g));
+      });
+
+      const sortedGenresList = mergeSort(Array.from(genres), (a, b) => a.localeCompare(b), 'asc').sorted;
+      const allGenres = ['ALL', ...sortedGenresList];
+      genreChipsContainer.innerHTML = '';
+
+      allGenres.forEach(g => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `genre-chip ${g === selectedGenre ? 'active' : ''}`;
+        btn.textContent = g === 'ALL' ? 'All genres' : (g.charAt(0).toUpperCase() + g.slice(1).toLowerCase());
+        btn.addEventListener('click', () => {
+          selectedGenre = g;
+          document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          runPipeline({ animate: false });
+        });
+        genreChipsContainer.appendChild(btn);
+      });
+    }
+
+    /**
+     * Core Pipeline: Filters dataset and extracts Top K using Heap.
+     */
+    function runPipeline({ animate = false } = {}) {
+      // 1. Filter by Genre
+      if (selectedGenre === 'ALL') {
+        filteredMovies = [...allMovies];
+      } else {
+        filteredMovies = allMovies.filter(m => (m.genres || m.genre || []).includes(selectedGenre));
+      }
+
+      const totalMatching = filteredMovies.length;
+      const effectiveK = Math.min(currentK, totalMatching);
+
+      // Handle friendly subset message if totalMatching < currentK
+      if (selectedGenre !== 'ALL' && totalMatching < currentK && totalMatching > 0) {
+        const genreName = selectedGenre.charAt(0).toUpperCase() + selectedGenre.slice(1).toLowerCase();
+        subsetNoteContainer.innerHTML = `
+          <div class="collection-count-note">
+            Only ${totalMatching} ${genreName} films in the collection. Here they all are.
+          </div>
+        `;
+        subsetNoteContainer.style.display = 'block';
+      } else {
+        subsetNoteContainer.style.display = 'none';
+      }
+
+      // Update status text
+      selectionStatusText.textContent = `Showing Top ${effectiveK} of ${totalMatching}`;
+
+      // Update Show More Tray visibility
+      if (effectiveK >= totalMatching) {
+        showMoreTray.style.display = 'none';
+      } else {
+        showMoreTray.style.display = 'flex';
+      }
+
+      // 2. Extract Top K using MaxHeap
+      const comparator = createMovieComparator('score');
+      const heap = new MaxHeap(comparator);
+      heap.buildHeap(filteredMovies);
+      activeHeapInstance = heap;
+
+      const res = heapTopK(filteredMovies, effectiveK, comparator);
+      const resultItems = res.topK;
+
+      // 3. Render List with FLIP motion
+      if (animate && rankedListContainer.children.length > 0) {
+        renderListWithFLIP(resultItems);
+      } else {
+        renderRankedList(resultItems);
+      }
+    }
+
+    /**
+     * Format genres with normal capitalization
+     */
+    function formatGenres(genresArray) {
+      if (!genresArray || genresArray.length === 0) return 'Film';
+      return genresArray.slice(0, 3).map(g => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase()).join(', ');
+    }
+
+    /**
+     * Star SVG generator helper
+     */
+    function renderStarPicker(movieId, currentScore10) {
+      const currentStarVal = currentScore10 ? Number(currentScore10) : 0;
+      let starsHtml = '';
+
+      for (let i = 1; i <= 5; i++) {
+        const fullScore = i * 2;
+        const halfScore = fullScore - 1;
+        const isFull = currentStarVal >= fullScore;
+        const isHalf = currentStarVal === halfScore;
+
+        starsHtml += `
+          <button type="button" 
+                  class="star-btn-segment ${isFull ? 'active-star' : ''}" 
+                  data-movie-id="${movieId}" 
+                  data-full-score="${fullScore}" 
+                  data-half-score="${halfScore}"
+                  aria-label="${i} stars">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </button>
+        `;
+      }
+
+      return `
+        <div class="star-rating-control" data-movie-id="${movieId}">
+          <span class="star-control-label">Your rating</span>
+          <div class="stars-picker-wrap" data-movie-id="${movieId}">
+            ${starsHtml}
+          </div>
+          <span class="rated-status-container" id="rateStatus-${movieId}">
+            ${currentStarVal ? `<span class="rated-text-pill">You rated it ${currentStarVal}/10</span>` : ''}
+          </span>
+        </div>
+      `;
+    }
+
+    /**
+     * Renders the full-width ranked list.
+     * Ranks 1-3: Featured large rows.
+     * Ranks 4+: Compact rows.
+     */
+    function renderRankedList(movies) {
+      rankedListContainer.innerHTML = '';
+
+      if (movies.length === 0) {
+        rankedListContainer.innerHTML = `
+          <div class="ranked-card" style="padding: var(--space-5); text-align: center;">
+            <p style="color: var(--color-paper-muted); margin: 0;">No films found matching this genre.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const wishlistItems = wishlist.getAll();
+      const wishlistSet = new Set(wishlistItems.map(it => it.movieId || it.id));
+      const allUserRatings = userRatings.getAll();
+
+      movies.forEach((m, idx) => {
+        const inWishlist = wishlistSet.has(m.id);
+        const userRatingVal = allUserRatings[m.id] ? allUserRatings[m.id].rating : null;
+        const genresStr = formatGenres(m.genres || m.genre || []);
+        const rankStr = String(idx + 1).padStart(2, '0');
+        const isTop3 = idx < 3;
+
+        const card = document.createElement('article');
+        card.className = `ranked-card ${isTop3 ? 'card-top3' : 'card-compact'}`;
+        card.dataset.movieId = m.id;
+
+        if (isTop3) {
+          // FEATURED ROW (Ranks 1-3)
+          card.innerHTML = `
+            <div class="top3-rank-col">
+              <span class="rank-outline" style="font-size: var(--text-4xl);">${rankStr}</span>
+              <div class="top3-poster-thumb">
+                <span class="top3-poster-title">${m.title}</span>
+                <span style="font-size: 8px; color: var(--color-paper-dim); margin-top: 2px;">${m.year}</span>
+              </div>
+            </div>
+
+            <div class="top3-body">
+              <div>
+                <div class="top3-title-row">
+                  <h2 class="top3-title">${m.title}</h2>
+                  <span class="audience-rating-val">${Number(m.rating).toFixed(1)} &#9733;</span>
+                </div>
+                <div class="top3-meta">
+                  <span>${m.year}</span>
+                  <span>&bull;</span>
+                  <span>Directed by ${m.director}</span>
+                  <span>&bull;</span>
+                  <span>${m.runtime} min</span>
+                  <span>&bull;</span>
+                  <span class="badge" style="font-size: 10px;">${genresStr}</span>
+                </div>
+              </div>
+
+              <p class="top3-synopsis">
+                ${m.overview || 'Canonical film recognized worldwide for remarkable direction, performances, and lasting impact.'}
+              </p>
+
+              <div class="card-actions-strip">
+                ${renderStarPicker(m.id, userRatingVal)}
+
+                <button 
+                  type="button" 
+                  class="btn-wishlist ${inWishlist ? 'in-wishlist' : ''}" 
+                  data-movie-id="${m.id}"
+                  aria-label="${inWishlist ? 'Remove from saved' : 'Save film'}"
+                >
+                  ${inWishlist ? '&check; Saved' : '+ Save'}
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // COMPACT ROW (Ranks 4+)
+          card.innerHTML = `
+            <div class="compact-rank-col">
+              <span class="rank-outline" style="font-size: var(--text-2xl);">${rankStr}</span>
+            </div>
+
+            <div class="compact-poster-thumb">
+              <span>${m.year}</span>
+            </div>
+
+            <div class="compact-body">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                <h3 class="compact-title">${m.title}</h3>
+                <span class="audience-rating-val" style="font-size: var(--text-sm);">${Number(m.rating).toFixed(1)} &#9733;</span>
+              </div>
+              <div class="compact-meta">
+                <span>${m.year}</span>
+                <span>&bull;</span>
+                <span>${m.director}</span>
+                <span>&bull;</span>
+                <span>${genresStr}</span>
+              </div>
+            </div>
+
+            <div class="card-actions-strip">
+              ${renderStarPicker(m.id, userRatingVal)}
+
+              <button 
+                type="button" 
+                class="btn-wishlist ${inWishlist ? 'in-wishlist' : ''}" 
+                data-movie-id="${m.id}"
+                aria-label="${inWishlist ? 'Remove from saved' : 'Save film'}"
+              >
+                ${inWishlist ? '&check; Saved' : '+ Save'}
+              </button>
+            </div>
+          `;
+        }
+
+        // Attach Star Picker listeners
+        attachStarRatingEvents(card, m);
+
+        // Attach Wishlist toggle
+        const wishBtn = card.querySelector('.btn-wishlist');
+        wishBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleWishlist(m, wishBtn);
+        });
+
+        rankedListContainer.appendChild(card);
+      });
+    }
+
+    /**
+     * Interactive Star Rating event binding (mouse & touch)
+     */
+    function attachStarRatingEvents(card, movie) {
+      const starBtns = card.querySelectorAll('.star-btn-segment');
+      const statusContainer = card.querySelector(`#rateStatus-${movie.id}`);
+
+      starBtns.forEach((btn, index) => {
+        // Click to rate
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const rect = btn.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          // If clicked on left half, assign halfScore; else fullScore
+          const isLeftHalf = clickX < rect.width / 2;
+          const assignedScore = isLeftHalf ? Number(btn.dataset.halfScore) : Number(btn.dataset.fullScore);
+
+          handleUserRatingChange(movie, assignedScore, statusContainer);
+        });
+
+        // Hover feedback
+        btn.addEventListener('mouseenter', () => {
+          starBtns.forEach((b, i) => {
+            b.classList.toggle('hover-star', i <= index);
+          });
+        });
+      });
+
+      const pickerWrap = card.querySelector('.stars-picker-wrap');
+      pickerWrap.addEventListener('mouseleave', () => {
+        starBtns.forEach(b => b.classList.remove('hover-star'));
+      });
+    }
+
+    /**
+     * FLIP animation for re-ranking when rating changes.
+     */
+    function renderListWithFLIP(movies) {
+      const firstPositions = new Map();
+      const existingCards = rankedListContainer.querySelectorAll('[data-movie-id]');
+      existingCards.forEach(card => {
+        const id = card.dataset.movieId;
+        if (id) {
+          firstPositions.set(id, card.getBoundingClientRect());
+        }
+      });
+
+      renderRankedList(movies);
+
+      // Check user reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      const newCards = rankedListContainer.querySelectorAll('[data-movie-id]');
+      newCards.forEach(card => {
+        const id = card.dataset.movieId;
+        if (id && firstPositions.has(id)) {
+          const first = firstPositions.get(id);
+          const last = card.getBoundingClientRect();
+          const deltaY = first.top - last.top;
+
+          if (deltaY !== 0) {
+            card.style.transform = `translateY(${deltaY}px)`;
+            card.style.transition = 'none';
+
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                card.style.transition = 'transform 280ms cubic-bezier(0.2, 0, 0, 1)';
+                card.style.transform = '';
+              });
+            });
+          }
+        }
+      });
+    }
+
+    /**
+     * Handles "Your rating" star interaction:
+     * - Records user rating in localStorage
+     * - Shows "You rated it X/10" and brief note "Your list has been updated"
+     * - Recalculates movie rating and weighted score
+     * - Sifts update through MaxHeap
+     * - Re-ranks visually with FLIP animation
+     */
+    function handleUserRatingChange(movie, newRating, statusContainer) {
+      if (!newRating) return;
+
+      // 1. Persist user rating
+      userRatings.setRating(movie.id, newRating);
+
+      // Update UI feedback immediately
+      if (statusContainer) {
+        statusContainer.innerHTML = `
+          <span class="rated-text-pill">You rated it ${newRating}/10</span>
+          <span class="rating-toast-note">Your list has been updated</span>
+        `;
+      }
+
+      // 2. Compute adjusted rating and score
+      const prevRating = Number(movie.rating) || 8.0;
+      const prevVotes = Number(movie.votes) || 25000;
+      const updatedRating = +(((prevRating * prevVotes) + (newRating * 500)) / (prevVotes + 500)).toFixed(2);
+      const updatedVotes = prevVotes + 500;
+      
+      const mThreshold = 25000;
+      const cMean = 8.09;
+      const newScore = computeWeightedRating(
+        { rating: updatedRating, votes: updatedVotes },
+        mThreshold,
+        cMean
+      );
+
+      // Update in-memory movie object
+      movie.rating = updatedRating;
+      movie.votes = updatedVotes;
+      movie.score = newScore;
+
+      // 3. Update heap instance if active
+      if (activeHeapInstance) {
+        activeHeapInstance.update(item => item.id === movie.id, {
+          rating: updatedRating,
+          votes: updatedVotes,
+          score: newScore
+        });
+      }
+
+      // 4. Re-run pipeline with FLIP animation after brief delay for user to see rating
+      setTimeout(() => {
+        runPipeline({ animate: true });
+      }, 350);
+    }
+
+    /**
+     * Wishlist toggle
+     */
+    function toggleWishlist(movie, btnEl) {
+      const items = wishlist.getAll();
+      const existing = items.find(it => it.movieId === movie.id || it.id === movie.id);
+      if (existing) {
+        wishlist.remove(existing.id);
+        btnEl.classList.remove('in-wishlist');
+        btnEl.innerHTML = '+ Save';
+        btnEl.setAttribute('aria-label', 'Save film');
+      } else {
+        wishlist.add(movie, 3);
+        btnEl.classList.add('in-wishlist');
+        btnEl.innerHTML = '&check; Saved';
+        btnEl.setAttribute('aria-label', 'Remove from saved');
+      }
+    }
+
+    // Show count buttons (10 / 20 / 30)
+    showCountBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        showCountBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentK = Number(btn.dataset.count) || 10;
+        runPipeline({ animate: false });
+      });
+    });
+
+    // "Show 10 more" button
+    showMoreBtn.addEventListener('click', () => {
+      currentK += 10;
+      showCountBtns.forEach(b => {
+        b.classList.toggle('active', Number(b.dataset.count) === currentK);
+      });
+      runPipeline({ animate: false });
+    });
+
+    // Bootstrapping
+    async function init() {
+      try {
+        const { movies } = await loadMovies('./data/movies.json');
+        allMovies = movies;
+        setupGenres(allMovies);
+        runPipeline({ animate: false });
+      } catch (err) {
+        rankedListContainer.innerHTML = `
+          <div class="ranked-card" style="color: var(--color-danger);">
+            Failed to load recommendations: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

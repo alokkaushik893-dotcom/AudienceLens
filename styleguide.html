@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudienceLens — Design System & Shell Review</title>
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    /* Styleguide-specific layout and specimen frames */
+    .styleguide-header-intro {
+      padding: var(--space-5) 0 var(--space-6) 0;
+      border-bottom: var(--border-hairline);
+      margin-bottom: var(--space-6);
+    }
+
+    .styleguide-section {
+      padding: var(--space-6) 0;
+      border-bottom: var(--border-hairline);
+    }
+
+    .styleguide-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .specimen-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+      margin-top: var(--space-4);
+    }
+
+    @media (min-width: 900px) {
+      .specimen-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .specimen-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .specimen-grid-asym {
+        grid-template-columns: 1.6fr 1fr;
+      }
+    }
+
+    .specimen-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .specimen-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      letter-spacing: var(--tracking-widest);
+      color: var(--color-paper-dim);
+      text-transform: uppercase;
+      padding-bottom: var(--space-2);
+      border-bottom: var(--border-subtle);
+    }
+
+    .swatch-row {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      width: 140px;
+      border: var(--border-hairline);
+      background: var(--color-surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .swatch-color {
+      height: 64px;
+      width: 100%;
+    }
+
+    .swatch-info {
+      padding: var(--space-2);
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      color: var(--color-paper-muted);
+    }
+
+    .rank-numeral-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-5);
+      flex-wrap: wrap;
+      background: var(--color-surface-sunken);
+      padding: var(--space-5);
+      border: var(--border-hairline);
+    }
+  </style>
+</head>
+<body>
+  <!-- Subtle 4% film grain overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Shared Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand">
+        <span class="site-wordmark">AudienceLens</span>
+        <span class="site-descriptor">Repertory Canon // 35mm</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="site-nav" aria-label="Main Navigation">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#movies" class="nav-link">Movies</a>
+        <a href="#recommendations" class="nav-link">Recommendations</a>
+        <a href="#wishlist" class="nav-link">Wishlist</a>
+        <a href="styleguide.html" class="nav-link active" aria-current="page">Styleguide</a>
+      </nav>
+
+      <!-- Mobile Navigation Toggle (< 720px) -->
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+      <a href="#home" class="mobile-nav-link">Home</a>
+      <a href="#movies" class="mobile-nav-link">Movies</a>
+      <a href="#recommendations" class="mobile-nav-link">Recommendations</a>
+      <a href="#wishlist" class="mobile-nav-link">Wishlist</a>
+      <a href="styleguide.html" class="mobile-nav-link active">Styleguide</a>
+    </div>
+  </header>
+
+  <!-- Main Styleguide Surface -->
+  <main class="site-main">
+    
+    <!-- Intro / Philosophy Banner -->
+    <section class="styleguide-header-intro">
+      <div class="eyebrow eyebrow-accent">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="6" r="4.5" stroke="#E8A33D" stroke-width="1.5"/>
+          <path d="M6 3.5V6L7.5 7.5" stroke="#E8A33D" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span>Design System Specification // Stage 0 Shell</span>
+      </div>
+      <h1 style="margin-top: var(--space-3); margin-bottom: var(--space-3);">
+        Cinema ticket stub meets film archive.
+      </h1>
+      <p class="lead" style="max-width: 820px;">
+        Ranked by 48,210 votes, not vibes. Built upon three deliberate tones, zero gradients, zero glassmorphism, 1px hairlines, and authentic physical ticket perforation mechanics.
+      </p>
+    </section>
+
+    <!-- SECTION 1: CHROMATIC SPECIMENS & HAIRLINES -->
+    <section class="styleguide-section">
+      <div class="eyebrow">Specimen 01 // Chromatic Register</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-4);">Color Palette & Hairline System</h2>
+      
+      <div class="swatch-row">
+        <div class="swatch">
+          <div class="swatch-color" style="background-color: #14110F;"></div>
+          <div class="swatch-info">
+            <strong>Nitrate Base</strong><br>
+            #14110F<br>
+            var(--color-bg)
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background-color: #1B1715;"></div>
+          <div class="swatch-info">
+            <strong>Surface Box</strong><br>
+            #1B1715<br>
+            var(--color-surface)
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background-color: #EFE8DA;"></div>
+          <div class="swatch-info" style="background-color: #231E1B;">
+            <strong>Aged Paper</strong><br>
+            #EFE8DA<br>
+            var(--color-paper)
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background-color: #B8B0A2;"></div>
+          <div class="swatch-info">
+            <strong>Paper Muted</strong><br>
+            #B8B0A2<br>
+            var(--color-paper-muted)
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background-color: #E8A33D;"></div>
+          <div class="swatch-info">
+            <strong>Marquee Amber</strong><br>
+            #E8A33D<br>
+            var(--color-accent)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: SIGNATURE OUTLINED RANK NUMERALS -->
+    <section class="styleguide-section">
+      <div class="eyebrow eyebrow-accent">Specimen 02 // Signature Architectural Element</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-3);">Outlined Rank Numerals</h2>
+      <p style="margin-bottom: var(--space-4); max-width: 720px;">
+        High-impact archival rank indicators with transparent fill and 1.5px hairline strokes in JetBrains Mono. Transitions to projection amber on active or hover states.
+      </p>
+
+      <div class="rank-numeral-row">
+        <div>
+          <span class="rank-outline active">01</span>
+          <div class="specimen-label" style="margin-top: var(--space-2);">Active / Root Element</div>
+        </div>
+        <div>
+          <span class="rank-outline">02</span>
+          <div class="specimen-label" style="margin-top: var(--space-2);">Standard Rank #2</div>
+        </div>
+        <div>
+          <span class="rank-outline">03</span>
+          <div class="specimen-label" style="margin-top: var(--space-2);">Standard Rank #3</div>
+        </div>
+        <div>
+          <span class="rank-outline">04</span>
+          <div class="specimen-label" style="margin-top: var(--space-2);">Standard Rank #4</div>
+        </div>
+        <div>
+          <span class="rank-outline rank-outline-display">10</span>
+          <div class="specimen-label" style="margin-top: var(--space-2);">Display Scale (104px)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TYPOGRAPHIC SCALE & HIERARCHIES -->
+    <section class="styleguide-section">
+      <div class="eyebrow">Specimen 03 // Typographic Register</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-4);">Serif, Sans & Monospace Scale</h2>
+
+      <div class="specimen-grid specimen-grid-2">
+        <div class="specimen-card">
+          <div class="specimen-label">Fraunces Serif // Headings</div>
+          <h1>Heading Level 1 (56px)</h1>
+          <h2>Heading Level 2 (40px)</h2>
+          <h3>Heading Level 3 (28px)</h3>
+          <h4>Heading Level 4 (22px)</h4>
+          <h5>Heading Level 5 (18px)</h5>
+        </div>
+
+        <div class="specimen-card">
+          <div class="specimen-label">DM Sans & JetBrains Mono // Body & Data</div>
+          <p class="lead">
+            Lead paragraph: Orson Welles fractured classical film grammar with deep-focus photography and nonlinear time.
+          </p>
+          <p>
+            Standard body: Every film in this canon is ranked via an empirical Bayesian weighted formula with strict secondary vote and tertiary alphabetical tie-breaking rules.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2);">
+            <div class="label-mono">Archive Code: CANON-35MM-1954</div>
+            <div class="font-mono" style="color: var(--color-accent); font-size: var(--text-lg); font-weight: 600;">
+              WR = 8.573 // 362,400 VOTES // 207 MIN
+            </div>
+            <div class="font-mono" style="color: var(--color-paper-dim); font-size: var(--text-xs);">
+              TIME COMP: O(n log n) // COMPARISONS: 561 // RUNTIME: 5.43ms
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: BUTTONS & CONTROLS -->
+    <section class="styleguide-section">
+      <div class="eyebrow">Specimen 04 // Button Architecture</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-4);">Actions & Interactive States</h2>
+
+      <div class="specimen-grid specimen-grid-3">
+        <div class="specimen-card">
+          <div class="specimen-label">Primary (Amber Fill)</div>
+          <button class="btn-primary">
+            <span>Execute Merge Sort</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.5 7H11.5M11.5 7L7.5 3M11.5 7L7.5 11" stroke="#14110F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn-primary btn-sm">Primary Small</button>
+          <button class="btn-primary" disabled>Primary Disabled</button>
+        </div>
+
+        <div class="specimen-card">
+          <div class="specimen-label">Secondary (Hairline Outline)</div>
+          <button class="btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 4H12M4 7H10M6 10H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Filter Catalogue</span>
+          </button>
+          <button class="btn-secondary btn-sm">Secondary Small</button>
+          <button class="btn-secondary" disabled>Secondary Disabled</button>
+        </div>
+
+        <div class="specimen-card">
+          <div class="specimen-label">Ghost & Utility</div>
+          <button class="btn-ghost">
+            <span>Extract Root (O(1))</span>
+          </button>
+          <div style="display: flex; gap: var(--space-2);">
+            <button class="btn-secondary btn-sm" aria-label="Sort ascending">ASC</button>
+            <button class="btn-primary btn-sm" aria-label="Sort descending">DESC</button>
+          </div>
+          <div class="eyebrow" style="margin-top: var(--space-2);">Focus Ring Indicator: Amber 2px</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FORM INPUTS, SELECTS & FILTERS -->
+    <section class="styleguide-section">
+      <div class="eyebrow">Specimen 05 // Input Mechanics</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-4);">Form Controls & Filter Bar</h2>
+
+      <div class="specimen-grid specimen-grid-2">
+        <div class="specimen-card">
+          <div class="specimen-label">Field Controls</div>
+          <div class="form-group">
+            <label class="form-label" for="searchFilm">Search Repertory Archive</label>
+            <input type="search" id="searchFilm" placeholder="e.g. Kurosawa, Tokyo Story, 1954...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selectGenre">Select Genre Criterion</label>
+            <select id="selectGenre">
+              <option>All Repertory Genres (105 Films)</option>
+              <option>Film-Noir</option>
+              <option>Japanese Golden Age</option>
+              <option>French New Wave</option>
+              <option>Soviet Montage & Poetic</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between;">
+              <label class="form-label" for="topKRange">Top-K Heap Extract Limit</label>
+              <span class="font-mono" style="color: var(--color-accent); font-size: var(--text-xs);">K = 15</span>
+            </div>
+            <input type="range" id="topKRange" min="5" max="50" value="15">
+          </div>
+        </div>
+
+        <div class="specimen-card">
+          <div class="specimen-label">Checkboxes & Badges</div>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+              <input type="checkbox" checked>
+              <span class="form-label" style="margin: 0; cursor: pointer;">Enforce Stable Comparator</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+              <input type="checkbox">
+              <span class="form-label" style="margin: 0; cursor: pointer;">Hide Watched Reel Items</span>
+            </label>
+          </div>
+
+          <div class="specimen-label" style="margin-top: var(--space-3);">Badges & Classification Tags</div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+            <span class="badge badge-amber">WR: 9.17</span>
+            <span class="badge">Drama</span>
+            <span class="badge">1954</span>
+            <span class="badge">207 MIN</span>
+            <span class="badge badge-pill">Max-Heap Top-10</span>
+            <span class="badge badge-outline">O(n log n)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: TICKET-STUB CARD COMPONENT -->
+    <section class="styleguide-section">
+      <div class="eyebrow eyebrow-accent">Specimen 06 // Signature Ticket Component</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-3);">The Ticket-Stub Movie Card</h2>
+      <p style="margin-bottom: var(--space-5); max-width: 720px;">
+        2:3 poster ratio with real perforated tear-line, radial punch notches, hairline framing, and authentic archival barcode ticket stub. Pure CSS with zero external image hacks.
+      </p>
+
+      <div class="specimen-grid specimen-grid-asym">
+        
+        <!-- Ticket Specimen 1: Seven Samurai -->
+        <article class="ticket-card" style="max-width: 380px;">
+          <!-- 2:3 Poster Area -->
+          <div class="ticket-poster-wrap">
+            <img 
+              class="ticket-poster-img" 
+              src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600&auto=format&fit=crop&q=80" 
+              alt="Seven Samurai archival poster"
+            >
+            <div style="position: absolute; top: 12px; left: 12px; display: flex; gap: 6px;">
+              <span class="badge badge-amber">01 // TOP HEAP</span>
+            </div>
+            <div style="position: absolute; bottom: 12px; right: 12px;">
+              <span class="badge font-mono" style="background-color: rgba(20, 17, 15, 0.9);">207 MIN</span>
+            </div>
+          </div>
+
+          <!-- Ticket Body -->
+          <div class="ticket-body">
+            <div class="ticket-meta">
+              <span>AKIRA KUROSAWA</span>
+              <span>•</span>
+              <span>1954</span>
+              <span>•</span>
+              <span>JAPAN</span>
+            </div>
+            <h3 class="ticket-title">Seven Samurai</h3>
+            <p style="font-size: var(--text-sm); line-height: var(--leading-snug);">
+              A besieged 16th-century farming village hires seven masterless samurai to defend against marauding bandits.
+            </p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--space-2);">
+              <div class="label-mono">WEIGHTED SCORE</div>
+              <div class="font-mono" style="font-size: var(--text-xl); font-weight: 700; color: var(--color-accent);">
+                8.573 <span style="font-size: var(--text-xs); color: var(--color-paper-dim); font-weight: 400;">/ 10</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Perforated Tear-Line with Semicircular Punch Notches -->
+          <div class="ticket-perforation" aria-hidden="true">
+            <div class="notch-left"></div>
+            <div class="notch-right"></div>
+          </div>
+
+          <!-- Stub Section -->
+          <div class="ticket-stub">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span class="label-mono" style="font-size: 9px; color: var(--color-paper-dim);">ADMIT CANON // NO. 001</span>
+              <span class="font-mono" style="color: var(--color-paper-muted); font-size: var(--text-2xs);">362,400 VERIFIED VOTES</span>
+            </div>
+
+            <!-- Stylized CSS barcode -->
+            <div class="ticket-stub-barcode" title="Archival Barcode">
+              <span style="width: 2px;"></span>
+              <span style="width: 4px;"></span>
+              <span style="width: 1px;"></span>
+              <span style="width: 3px;"></span>
+              <span style="width: 2px;"></span>
+              <span style="width: 5px;"></span>
+              <span style="width: 2px;"></span>
+              <span style="width: 1px;"></span>
+              <span style="width: 3px;"></span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Ticket Component Breakdown Notes -->
+        <div class="specimen-card" style="justify-content: center;">
+          <div class="specimen-label">Ticket Anatomy & Construction Notes</div>
+          <ul style="display: flex; flex-direction: column; gap: var(--space-3); color: var(--color-paper-muted); font-size: var(--text-sm); list-style: none;">
+            <li style="display: flex; gap: var(--space-2);">
+              <span style="color: var(--color-accent); font-family: var(--font-mono);">01</span>
+              <span><strong>2:3 Poster Ratio:</strong> Locked via CSS <code>aspect-ratio: 2 / 3</code> with subtle archival grayscale tint.</span>
+            </li>
+            <li style="display: flex; gap: var(--space-2);">
+              <span style="color: var(--color-accent); font-family: var(--font-mono);">02</span>
+              <span><strong>CSS Radial Notches:</strong> Semicircular cutouts on left and right margins aligned to match background color without SVG dependencies.</span>
+            </li>
+            <li style="display: flex; gap: var(--space-2);">
+              <span style="color: var(--color-accent); font-family: var(--font-mono);">03</span>
+              <span><strong>Perforation Tear-Line:</strong> 1px dashed divider representing the physical tear boundary of admission stubs.</span>
+            </li>
+            <li style="display: flex; gap: var(--space-2);">
+              <span style="color: var(--color-accent); font-family: var(--font-mono);">04</span>
+              <span><strong>Tear-Off Stub:</strong> Bottom metadata tray with ticket accession serials, verified vote count, and barcode motif.</span>
+            </li>
+          </ul>
+
+          <div style="margin-top: var(--space-3); display: flex; gap: var(--space-2);">
+            <button class="btn-primary btn-sm">Add to Wishlist Heap</button>
+            <button class="btn-secondary btn-sm">Examine In Heap</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 7: ARCHIVAL TABLE ROW -->
+    <section class="styleguide-section">
+      <div class="eyebrow">Specimen 07 // Catalogue Log</div>
+      <h2 style="margin-top: var(--space-2); margin-bottom: var(--space-4);">Archival Repertory Table Row</h2>
+
+      <div class="table-container">
+        <table class="archival-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Rank</th>
+              <th>Archival Title</th>
+              <th>Director</th>
+              <th>Year</th>
+              <th>Genre</th>
+              <th style="text-align: right;">Raw R</th>
+              <th style="text-align: right;">Weighted WR</th>
+              <th style="text-align: right;">Votes</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-rank">01</td>
+              <td>
+                <div class="cell-title">The Godfather</div>
+                <div class="label-mono" style="font-size: 10px; color: var(--color-paper-dim);">175 MIN // UNITED STATES</div>
+              </td>
+              <td style="color: var(--color-paper-muted);">Francis Ford Coppola</td>
+              <td class="cell-mono">1972</td>
+              <td><span class="badge">Crime / Drama</span></td>
+              <td class="cell-mono" style="text-align: right;">9.2</td>
+              <td class="cell-mono" style="text-align: right; color: var(--color-accent); font-weight: 700;">9.170</td>
+              <td class="cell-mono" style="text-align: right;">2,045,000</td>
+              <td style="text-align: right;">
+                <button class="btn-secondary btn-sm" style="padding: 4px 8px;">+ Watchlist</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="cell-rank">02</td>
+              <td>
+                <div class="cell-title">The Godfather Part II</div>
+                <div class="label-mono" style="font-size: 10px; color: var(--color-paper-dim);">202 MIN // UNITED STATES</div>
+              </td>
+              <td style="color: var(--color-paper-muted);">Francis Ford Coppola</td>
+              <td class="cell-mono">1974</td>
+              <td><span class="badge">Crime / Drama</span></td>
+              <td class="cell-mono" style="text-align: right;">9.0</td>
+              <td class="cell-mono" style="text-align: right; color: var(--color-accent); font-weight: 700;">8.963</td>
+              <td class="cell-mono" style="text-align: right;">1,380,000</td>
+              <td style="text-align: right;">
+                <button class="btn-secondary btn-sm" style="padding: 4px 8px;">+ Watchlist</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="cell-rank">03</td>
+              <td>
+                <div class="cell-title">Seven Samurai</div>
+                <div class="label-mono" style="font-size: 10px; color: var(--color-paper-dim);">207 MIN // JAPAN</div>
+              </td>
+              <td style="color: var(--color-paper-muted);">Akira Kurosawa</td>
+              <td class="cell-mono">1954</td>
+              <td><span class="badge">Drama / Action</span></td>
+              <td class="cell-mono" style="text-align: right;">8.6</td>
+              <td class="cell-mono" style="text-align: right; color: var(--color-accent); font-weight: 700;">8.531</td>
+              <td class="cell-mono" style="text-align: right;">362,400</td>
+              <td style="text-align: right;">
+                <button class="btn-secondary btn-sm" style="padding: 4px 8px;">+ Watchlist</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        AudienceLens Archival Canon — Preserving 35mm frames and rigorous comparators since 1927. Ranked by 48,210 votes, not vibes.
+      </div>
+      <div class="footer-meta">
+        No script was injured in the making of this heap.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile navigation interaction script -->
+  <script>
+    const toggle = document.getElementById('mobileNavToggle');
+    const drawer = document.getElementById('mobileNavDrawer');
+
+    if (toggle && drawer) {
+      toggle.addEventListener('click', () => {
+        const isOpen = toggle.classList.toggle('open');
+        drawer.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen);
+      });
+
+      // Close on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer.classList.contains('open')) {
+          toggle.classList.remove('open');
+          drawer.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

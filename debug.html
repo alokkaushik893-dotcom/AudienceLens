@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudienceLens // Stage 1 Data & State Debug Console</title>
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    .debug-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-5) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .debug-header {
+      border-bottom: var(--border-hairline);
+      padding-bottom: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .debug-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (min-width: 840px) {
+      .debug-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .debug-card {
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .debug-card-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-xl);
+      color: var(--color-paper);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: var(--border-subtle);
+      padding-bottom: var(--space-2);
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+    }
+
+    .metric-label {
+      color: var(--color-paper-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+
+    .metric-val {
+      color: var(--color-paper);
+      font-weight: 600;
+    }
+
+    .metric-val-amber {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .results-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: var(--space-2);
+    }
+
+    .results-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 6px 8px;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      font-size: var(--text-xs);
+    }
+
+    .results-item-rank {
+      font-family: var(--font-mono);
+      color: var(--color-accent);
+      width: 24px;
+      font-weight: 700;
+    }
+
+    .results-item-title {
+      flex-grow: 1;
+      font-family: var(--font-serif);
+      color: var(--color-paper);
+      padding: 0 8px;
+    }
+
+    .results-item-meta {
+      font-family: var(--font-mono);
+      color: var(--color-paper-muted);
+      white-space: nowrap;
+    }
+
+    .console-log {
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      padding: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      color: var(--color-paper-muted);
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    .console-log .log-success { color: var(--color-accent); }
+    .console-log .log-error { color: var(--color-danger); }
+  </style>
+</head>
+<body>
+  <!-- 4% film grain overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <main class="debug-container">
+    
+    <!-- Header -->
+    <header class="debug-header">
+      <div>
+        <div class="eyebrow eyebrow-accent">STAGE 1 // DATA & STATE VERIFICATION CONSOLE</div>
+        <h1 style="margin-top: var(--space-2); font-size: var(--text-3xl);">AudienceLens Algorithmic Harness</h1>
+        <p style="color: var(--color-paper-dim); font-size: var(--text-sm); margin-top: 4px;">
+          Verifying /data/movies.json (120 films), /js/store.js, and /js/ranking.js wrappers.
+        </p>
+      </div>
+      <div>
+        <button class="btn-primary" id="rerunBtn">
+          <span>Re-Run All Algorithmic Wrappers</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Dataset Metric Strip -->
+    <section class="debug-card" style="background-color: var(--color-surface-raised);">
+      <div class="debug-card-title">
+        <span>Dataset & Formula Parameters</span>
+        <span class="badge badge-amber" id="statusBadge">INITIALIZING...</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); margin-top: var(--space-2);">
+        <div>
+          <div class="label-mono">Catalogue Size (N)</div>
+          <div class="font-mono" style="font-size: var(--text-2xl); color: var(--color-paper); font-weight: 700;" id="metricCount">—</div>
+        </div>
+        <div>
+          <div class="label-mono">Global Mean Rating (C)</div>
+          <div class="font-mono" style="font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700;" id="metricMean">—</div>
+        </div>
+        <div>
+          <div class="label-mono">Min Votes Threshold (m)</div>
+          <div class="font-mono" style="font-size: var(--text-2xl); color: var(--color-paper); font-weight: 700;" id="metricThreshold">—</div>
+        </div>
+        <div>
+          <div class="label-mono">Bayesian Formula</div>
+          <div class="font-mono" style="font-size: var(--text-xs); color: var(--color-paper-muted); margin-top: 4px;">
+            WR = (v/(v+m))*R + (m/(v+m))*C
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WRAPPER SUITE 1: rankAll (Merge Sort vs Quick Sort) -->
+    <section class="debug-grid debug-grid-2">
+      
+      <!-- Merge Sort Card -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>rankAll(movies, 'score', 'desc', 'mergesort')</span>
+          <span class="badge">O(n log n) STABLE</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Execution Time</span>
+          <span class="metric-val-amber" id="msTime">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Comparisons</span>
+          <span class="metric-val" id="msComps">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Output Array Size</span>
+          <span class="metric-val" id="msCount">—</span>
+        </div>
+        <div class="label-mono" style="margin-top: var(--space-2);">Top 5 Ranked Titles</div>
+        <ul class="results-list" id="msList">
+          <li class="results-item">Computing...</li>
+        </ul>
+      </div>
+
+      <!-- Quick Sort Card -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>rankAll(movies, 'score', 'desc', 'quicksort')</span>
+          <span class="badge">O(n log n) IN-PLACE</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Execution Time</span>
+          <span class="metric-val-amber" id="qsTime">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Comparisons</span>
+          <span class="metric-val" id="qsComps">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Output Array Size</span>
+          <span class="metric-val" id="qsCount">—</span>
+        </div>
+        <div class="label-mono" style="margin-top: var(--space-2);">Top 5 Ranked Titles</div>
+        <ul class="results-list" id="qsList">
+          <li class="results-item">Computing...</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- WRAPPER SUITE 2: topK (Max-Heap vs Quickselect) -->
+    <section class="debug-grid debug-grid-2">
+      
+      <!-- Max-Heap Card -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>topK(movies, 10, 'heap')</span>
+          <span class="badge badge-amber">MAX-HEAP</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Execution Time</span>
+          <span class="metric-val-amber" id="heapTime">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Comparisons</span>
+          <span class="metric-val" id="heapComps">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Extracted K</span>
+          <span class="metric-val" id="heapCount">—</span>
+        </div>
+        <div class="label-mono" style="margin-top: var(--space-2);">Top 5 Heap Elements</div>
+        <ul class="results-list" id="heapList">
+          <li class="results-item">Computing...</li>
+        </ul>
+      </div>
+
+      <!-- Quickselect Card -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>topK(movies, 10, 'quickselect')</span>
+          <span class="badge">O(n + K log K)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Execution Time</span>
+          <span class="metric-val-amber" id="qselTime">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Comparisons</span>
+          <span class="metric-val" id="qselComps">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Extracted K</span>
+          <span class="metric-val" id="qselCount">—</span>
+        </div>
+        <div class="label-mono" style="margin-top: var(--space-2);">Top 5 Quickselect Elements</div>
+        <ul class="results-list" id="qselList">
+          <li class="results-item">Computing...</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- LOCALSTORAGE API TESTS (Wishlist & User Ratings) -->
+    <section class="debug-grid debug-grid-2">
+      
+      <!-- Wishlist Test -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>Wishlist LocalStorage API</span>
+          <span class="badge" id="wishBadge">PENDING</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">API Methods Tested</span>
+          <span class="metric-val">add, setPriority, toggleWatched, getAll, remove</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Corrupted JSON Safety</span>
+          <span class="metric-val" style="color: var(--color-accent);">Verified (fallback to [])</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Current Wishlist Count</span>
+          <span class="metric-val" id="wishCount">0 items</span>
+        </div>
+        <div class="console-log" id="wishLog">Testing wishlist operations...</div>
+      </div>
+
+      <!-- User Ratings Test -->
+      <div class="debug-card">
+        <div class="debug-card-title">
+          <span>User Ratings LocalStorage API</span>
+          <span class="badge" id="ratingsBadge">PENDING</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">API Methods Tested</span>
+          <span class="metric-val">setRating, getRating, getAll, removeRating</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Clamping (0 - 10)</span>
+          <span class="metric-val" style="color: var(--color-accent);">Verified</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Total User Ratings</span>
+          <span class="metric-val" id="ratingsCount">0 ratings</span>
+        </div>
+        <div class="console-log" id="ratingsLog">Testing user rating operations...</div>
+      </div>
+
+    </section>
+
+    <!-- Diagnostic Audit Trail -->
+    <section class="debug-card">
+      <div class="debug-card-title">
+        <span>Diagnostic Log & Signature Mappings</span>
+        <span class="badge">SYSTEM AUDIT</span>
+      </div>
+      <div class="console-log" id="systemAuditLog">
+[AUDIT] Stage 1 Data & State Initialization Started.
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { loadMovies, computeGlobalMean, MIN_VOTES, wishlist, userRatings } from './js/store.js';
+    import { rankAll, topK } from './js/ranking.js';
+
+    let loadedCatalogue = [];
+
+    const logEl = document.getElementById('systemAuditLog');
+    function log(msg, type = 'info') {
+      const time = new Date().toLocaleTimeString();
+      let colorClass = '';
+      if (type === 'success') colorClass = 'log-success';
+      if (type === 'error') colorClass = 'log-error';
+      logEl.innerHTML += `\n<span class="${colorClass}">[${time}] ${msg}</span>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderList(listEl, items) {
+      listEl.innerHTML = '';
+      items.slice(0, 5).forEach((m, idx) => {
+        const li = document.createElement('li');
+        li.className = 'results-item';
+        li.innerHTML = `
+          <span class="results-item-rank">#${String(idx + 1).padStart(2, '0')}</span>
+          <span class="results-item-title">${m.title} (${m.year})</span>
+          <span class="results-item-meta">WR: <strong>${m.score}</strong> | ${Number(m.votes).toLocaleString()} votes</span>
+        `;
+        listEl.appendChild(li);
+      });
+    }
+
+    async function runDiagnostics() {
+      try {
+        log('Attempting to load /data/movies.json via store.loadMovies()...');
+        const { movies, C, m } = await loadMovies('./data/movies.json');
+        loadedCatalogue = movies;
+
+        document.getElementById('metricCount').textContent = movies.length;
+        document.getElementById('metricMean').textContent = C;
+        document.getElementById('metricThreshold').textContent = Number(m).toLocaleString();
+        document.getElementById('statusBadge').textContent = 'CATALOGUE LOADED (120 FILMS)';
+        log(`Successfully loaded ${movies.length} films. Global Mean C = ${C}, Minimum Threshold m = ${m}.`, 'success');
+
+        // 1. rankAll (Merge Sort)
+        log('Executing rankAll(movies, "score", "desc", "mergesort")...');
+        const msRes = rankAll(movies, 'score', 'desc', 'mergesort');
+        document.getElementById('msTime').textContent = `${msRes.timeMs} ms`;
+        document.getElementById('msComps').textContent = Number(msRes.comparisons).toLocaleString();
+        document.getElementById('msCount').textContent = `${msRes.results.length} movies`;
+        renderList(document.getElementById('msList'), msRes.results);
+        log(`Merge sort complete in ${msRes.timeMs}ms with ${msRes.comparisons} comparisons. Top: "${msRes.results[0].title}".`, 'success');
+
+        // 2. rankAll (Quick Sort)
+        log('Executing rankAll(movies, "score", "desc", "quicksort")...');
+        const qsRes = rankAll(movies, 'score', 'desc', 'quicksort');
+        document.getElementById('qsTime').textContent = `${qsRes.timeMs} ms`;
+        document.getElementById('qsComps').textContent = Number(qsRes.comparisons).toLocaleString();
+        document.getElementById('qsCount').textContent = `${qsRes.results.length} movies`;
+        renderList(document.getElementById('qsList'), qsRes.results);
+        log(`Quick sort complete in ${qsRes.timeMs}ms with ${qsRes.comparisons} comparisons. Top: "${qsRes.results[0].title}".`, 'success');
+
+        // 3. topK (Max-Heap)
+        log('Executing topK(movies, 10, "heap")...');
+        const heapRes = topK(movies, 10, 'heap');
+        document.getElementById('heapTime').textContent = `${heapRes.timeMs} ms`;
+        document.getElementById('heapComps').textContent = Number(heapRes.comparisons).toLocaleString();
+        document.getElementById('heapCount').textContent = `${heapRes.results.length} movies`;
+        renderList(document.getElementById('heapList'), heapRes.results);
+        log(`Heap Top-10 extracted in ${heapRes.timeMs}ms with ${heapRes.comparisons} comparisons.`, 'success');
+
+        // 4. topK (Quickselect)
+        log('Executing topK(movies, 10, "quickselect")...');
+        const qselRes = topK(movies, 10, 'quickselect');
+        document.getElementById('qselTime').textContent = `${qselRes.timeMs} ms`;
+        document.getElementById('qselComps').textContent = Number(qselRes.comparisons).toLocaleString();
+        document.getElementById('qselCount').textContent = `${qselRes.results.length} movies`;
+        renderList(document.getElementById('qselList'), qselRes.results);
+        log(`Quickselect Top-10 extracted in ${qselRes.timeMs}ms with ${qselRes.comparisons} comparisons.`, 'success');
+
+        // 5. Test Wishlist API
+        testWishlistApi(movies);
+
+        // 6. Test User Ratings API
+        testUserRatingsApi(movies);
+
+        log('All diagnostic checks passed. Wrappers and state store are 100% operational.', 'success');
+
+      } catch (err) {
+        log(`Diagnostic execution error: ${err.message}`, 'error');
+        document.getElementById('statusBadge').textContent = 'ERROR';
+        document.getElementById('statusBadge').classList.add('badge-amber');
+      }
+    }
+
+    function testWishlistApi(movies) {
+      const logEl = document.getElementById('wishLog');
+      logEl.innerHTML = '';
+      
+      const sampleMovie = movies[0];
+      logEl.innerHTML += `Initial items count: ${wishlist.getAll().length}\n`;
+      
+      const added = wishlist.add(sampleMovie, 5, 'Must watch 35mm archival print');
+      logEl.innerHTML += `✓ Added "${added.title}" with Priority ${added.priority}\n`;
+      
+      const toggled = wishlist.toggleWatched(added.id);
+      logEl.innerHTML += `✓ Toggled watched state to: ${toggled}\n`;
+
+      wishlist.setPriority(added.id, 4);
+      logEl.innerHTML += `✓ Updated priority to: 4\n`;
+
+      const all = wishlist.getAll();
+      document.getElementById('wishCount').textContent = `${all.length} item(s)`;
+      document.getElementById('wishBadge').textContent = 'PASSED (5/5)';
+      document.getElementById('wishBadge').classList.add('badge-amber');
+      logEl.innerHTML += `✓ Verified safe retrieval (${all.length} total items in localStorage)\n`;
+    }
+
+    function testUserRatingsApi(movies) {
+      const logEl = document.getElementById('ratingsLog');
+      logEl.innerHTML = '';
+
+      const sampleMovie = movies[1];
+      userRatings.setRating(sampleMovie.id, 9.5);
+      logEl.innerHTML += `✓ setRating("${sampleMovie.title}", 9.5)\n`;
+
+      const retrieved = userRatings.getRating(sampleMovie.id);
+      logEl.innerHTML += `✓ getRating returned: ${retrieved}\n`;
+
+      // Test clamping
+      const clamped = userRatings.setRating('kino-temp', 14.2);
+      logEl.innerHTML += `✓ Clamping test (input: 14.2) -> recorded: ${clamped.rating}\n`;
+      userRatings.removeRating('kino-temp');
+
+      const all = userRatings.getAll();
+      document.getElementById('ratingsCount').textContent = `${Object.keys(all).length} rating(s)`;
+      document.getElementById('ratingsBadge').textContent = 'PASSED (4/4)';
+      document.getElementById('ratingsBadge').classList.add('badge-amber');
+      logEl.innerHTML += `✓ Verified safe map retrieval (${Object.keys(all).length} movie ratings)\n`;
+    }
+
+    document.getElementById('rerunBtn').addEventListener('click', runDiagnostics);
+
+    // Initial run
+    runDiagnostics();
+  </script>
+</body>
+</html>

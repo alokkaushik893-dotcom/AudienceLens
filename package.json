@@ -1,0 +1,12 @@
+{
+  "name": "audiencelens",
+  "version": "1.0.0",
+  "description": "AudienceLens: Repertory Film Canon & Algorithmic Archive",
+  "type": "module",
+  "scripts": {
+    "test": "node algorithms.test.js"
+  },
+  "keywords": ["algorithms", "cinema", "ranking", "heap", "mergesort", "quicksort"],
+  "author": "AudienceLens Archivists",
+  "license": "MIT"
+}

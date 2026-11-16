@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudienceLens — All Films</title>
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    /* -------------------------------------------------------------
+       MOVIES PAGE STYLES
+       ------------------------------------------------------------- */
+    
+    /* Page Intro */
+    .catalogue-intro {
+      padding: var(--space-5) 0 var(--space-4) 0;
+      border-bottom: var(--border-hairline);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .catalogue-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
+    .catalogue-headline {
+      font-family: var(--font-serif);
+      font-size: var(--text-3xl);
+      color: var(--color-paper);
+      margin: 0;
+    }
+
+    @media (min-width: 768px) {
+      .catalogue-headline {
+        font-size: var(--text-4xl);
+      }
+    }
+
+    .catalogue-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-paper-muted);
+      max-width: 680px;
+      margin: 0;
+    }
+
+    /* Sticky Filter Bar */
+    .sticky-filter-bar {
+      position: sticky;
+      top: 64px;
+      z-index: calc(var(--z-nav) - 5);
+      background-color: rgba(20, 17, 15, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: var(--border-hairline);
+      margin-left: calc(-1 * var(--space-4));
+      margin-right: calc(-1 * var(--space-4));
+      padding: var(--space-3) var(--space-4);
+      transition: background-color var(--transition-fast);
+    }
+
+    @media (min-width: 768px) {
+      .sticky-filter-bar {
+        margin-left: calc(-1 * var(--space-6));
+        margin-right: calc(-1 * var(--space-6));
+        padding: var(--space-3) var(--space-6);
+      }
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    @media (min-width: 640px) {
+      .filter-grid {
+        grid-template-columns: 1.5fr 1fr;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .filter-grid {
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.5fr auto;
+        align-items: end;
+      }
+    }
+
+    /* Genre Multi-Select Chips Bar */
+    .genre-section {
+      margin-top: var(--space-3);
+    }
+
+    .genre-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 2px;
+    }
+
+    .genre-chip {
+      padding: 4px 10px;
+      border: var(--border-hairline);
+      background: var(--color-surface);
+      color: var(--color-paper-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      letter-spacing: var(--tracking-wider);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+      transition: all var(--transition-fast);
+    }
+
+    .genre-chip:hover {
+      border-color: var(--color-paper);
+      color: var(--color-paper);
+    }
+
+    .genre-chip.active {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    /* Secondary Controls Strip */
+    .controls-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: var(--border-subtle);
+    }
+
+    .results-count-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-paper-muted);
+    }
+
+    .view-toggle-group {
+      display: flex;
+      border: var(--border-hairline);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .view-toggle-btn {
+      padding: 6px 14px;
+      background-color: var(--color-surface);
+      color: var(--color-paper-muted);
+      border: none;
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .view-toggle-btn.active {
+      background-color: var(--color-paper);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    .view-toggle-btn:not(.active):hover {
+      background-color: var(--color-surface-raised);
+      color: var(--color-paper);
+    }
+
+    /* Results Container & FLIP Transition Target */
+    #resultsContainer {
+      margin-top: var(--space-4);
+      min-height: 400px;
+    }
+
+    /* -------------------------------------------------------------
+       VIEW 1: DENSE TABLE
+       ------------------------------------------------------------- */
+    .dense-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--border-hairline);
+      background-color: var(--color-surface);
+    }
+
+    .dense-catalogue-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+      text-align: left;
+    }
+
+    .dense-catalogue-table th {
+      background-color: var(--color-surface-raised);
+      border-bottom: var(--border-hairline);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: var(--tracking-wider);
+      color: var(--color-paper-dim);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .dense-catalogue-table td {
+      padding: 12px 14px;
+      border-bottom: var(--border-subtle);
+      color: var(--color-paper-muted);
+      vertical-align: middle;
+    }
+
+    .dense-catalogue-table tr:hover td {
+      background-color: rgba(239, 232, 218, 0.04);
+      color: var(--color-paper);
+    }
+
+    .dense-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dense-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-base);
+      color: var(--color-paper);
+      font-weight: 600;
+      line-height: var(--leading-tight);
+    }
+
+    .dense-director {
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      color: var(--color-paper-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .dense-rank {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-paper-dim);
+      width: 44px;
+    }
+
+    /* -------------------------------------------------------------
+       VIEW 2: POSTER GRID
+       ------------------------------------------------------------- */
+    .poster-grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (min-width: 520px) {
+      .poster-grid-layout {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 840px) {
+      .poster-grid-layout {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      /* First card featured span 2 columns */
+      .poster-grid-layout .ticket-card.card-featured {
+        grid-column: span 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+      }
+
+      .poster-grid-layout .ticket-card.card-featured .ticket-poster-wrap {
+        border-bottom: none;
+        border-right: var(--border-hairline);
+        height: 100%;
+      }
+    }
+
+    @media (min-width: 1140px) {
+      .poster-grid-layout {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* Ticket Card Poster Area & Placeholder */
+    .poster-placeholder-panel {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background-color: var(--color-surface-sunken);
+      border: var(--border-hairline);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--space-4);
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .card-featured .poster-placeholder-panel {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .poster-placeholder-center {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      max-width: 90%;
+    }
+
+    .poster-placeholder-title {
+      font-family: var(--font-serif);
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-paper);
+      line-height: var(--leading-tight);
+    }
+
+    .poster-placeholder-meta {
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      color: var(--color-paper-muted);
+    }
+
+    .poster-badge-topleft {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+    }
+
+    .poster-badge-topright {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+    }
+
+    .badge-rating {
+      background-color: rgba(20, 17, 15, 0.88);
+      color: var(--color-accent);
+      border: var(--border-subtle);
+      font-weight: 700;
+    }
+
+    .featured-info-col {
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-4);
+      background-color: var(--color-surface);
+    }
+
+    /* Wishlist button toggle states */
+    .btn-wishlist {
+      font-family: var(--font-mono);
+      font-size: var(--text-2xs);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border: var(--border-hairline);
+      background: transparent;
+      color: var(--color-paper-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-wishlist:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-accent-subtle);
+    }
+
+    .btn-wishlist.in-wishlist {
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-bg);
+      font-weight: 700;
+    }
+
+    /* Empty State */
+    .empty-archive-state {
+      padding: var(--space-6) var(--space-5);
+      background-color: var(--color-surface);
+      border: var(--border-hairline);
+      border-left: 3px solid var(--color-accent);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      max-width: 640px;
+      margin: var(--space-5) auto;
+    }
+
+    /* Load More Tray */
+    .load-more-tray {
+      margin-top: var(--space-5);
+      padding: var(--space-4) 0;
+      border-top: var(--border-hairline);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .load-status-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-paper-dim);
+      letter-spacing: var(--tracking-wider);
+    }
+
+    #sortKey {
+      width: 100%;
+      min-width: 150px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 4% film grain overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Shared Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand">
+        <span class="site-wordmark">AudienceLens</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="site-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="movies.html" class="nav-link active" aria-current="page">Movies</a>
+        <a href="recommendations.html" class="nav-link">Recommendations</a>
+        <a href="wishlist.html" class="nav-link">Wishlist</a>
+      </nav>
+
+      <!-- Mobile Navigation Toggle (< 720px) -->
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="movies.html" class="mobile-nav-link active">Movies</a>
+      <a href="recommendations.html" class="mobile-nav-link">Recommendations</a>
+      <a href="wishlist.html" class="mobile-nav-link">Wishlist</a>
+    </div>
+  </header>
+
+  <!-- Main Catalogue Content -->
+  <main class="site-main">
+    
+    <!-- Page Header -->
+    <section class="catalogue-intro">
+      <div class="eyebrow eyebrow-accent">ALL FILMS</div>
+      <div class="catalogue-title-row">
+        <h1 class="catalogue-headline" id="liveHeaderCount">
+          120 films worth your evening.
+        </h1>
+      </div>
+      <p class="catalogue-subtitle">
+        Search, filter by genre or year, and sort by rating.
+      </p>
+    </section>
+
+    <!-- Sticky Filter Bar -->
+    <section class="sticky-filter-bar" aria-label="Movie Filters">
+      <div class="filter-grid">
+        
+        <!-- Search Input -->
+        <div class="form-group">
+          <label class="form-label" for="searchInput">Search</label>
+          <input 
+            type="search" 
+            id="searchInput" 
+            placeholder="Title or director..."
+            aria-label="Search by title or director"
+          >
+        </div>
+
+        <!-- Year Range Inputs -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between;">
+            <label class="form-label" for="yearMin">Year</label>
+            <span class="font-mono" style="font-size: var(--text-2xs); color: var(--color-paper-dim);" id="yearLabel">1920 – 2024</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="number" id="yearMin" min="1920" max="2024" value="1920" style="padding: 8px 10px; font-family: var(--font-mono); font-size: var(--text-xs);" aria-label="Minimum Year">
+            <span style="color: var(--color-paper-dim); align-self: center;">–</span>
+            <input type="number" id="yearMax" min="1920" max="2024" value="2024" style="padding: 8px 10px; font-family: var(--font-mono); font-size: var(--text-xs);" aria-label="Maximum Year">
+          </div>
+        </div>
+
+        <!-- Rating Slider -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between;">
+            <label class="form-label" for="ratingMin">Minimum rating</label>
+            <span class="font-mono" style="font-size: var(--text-2xs); color: var(--color-accent); font-weight: 700;" id="ratingLabel">≥ 0.0 ★</span>
+          </div>
+          <input type="range" id="ratingMin" min="0" max="9.5" step="0.1" value="0" aria-label="Minimum Rating Filter">
+        </div>
+
+        <!-- Sort Key & Order -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between;">
+            <label class="form-label" for="sortKey">Sort by</label>
+            <button class="btn-ghost btn-sm" id="orderToggleBtn" style="padding: 0; font-size: var(--text-2xs); color: var(--color-accent);" title="Toggle Sort Order">
+              <span id="orderLabel">Highest first &darr;</span>
+            </button>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <select id="sortKey" aria-label="Select Sort Criterion">
+              <option value="score">Best overall</option>
+              <option value="rating">Highest rated</option>
+              <option value="year">Newest</option>
+              <option value="votes">Most popular</option>
+              <option value="runtime">Runtime</option>
+              <option value="title">Title (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="form-group" style="align-self: end;">
+          <button class="btn-secondary btn-sm" id="resetFiltersBtn" title="Clear all filters" style="padding: 8px 14px; width: 100%; white-space: nowrap;">
+            Clear filters
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Genre Multi-Select Chips Bar -->
+      <div class="genre-section">
+        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+          <span class="form-label" style="margin-bottom: 0;">Genre</span>
+          <span class="font-mono" style="font-size: 11px; color: var(--color-accent);" id="genreSelectedCount"></span>
+        </div>
+        <div class="genre-chips-wrap" id="genreChipsContainer" role="group" aria-label="Genre Filters">
+          <!-- Dynamically populated chips -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Secondary Controls Strip -->
+    <div class="controls-strip">
+      <span class="results-count-text" id="matchingCountText">
+        Showing 120 films
+      </span>
+
+      <!-- View Toggle: List vs Posters -->
+      <div class="view-toggle-group" role="radiogroup" aria-label="Layout view mode">
+        <button class="view-toggle-btn active" id="viewTableBtn" role="radio" aria-checked="true" aria-label="List View">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 3H12.5M1.5 7H12.5M1.5 11H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>List</span>
+        </button>
+        <button class="view-toggle-btn" id="viewGridBtn" role="radio" aria-checked="false" aria-label="Posters View">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="8" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="2" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="8" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          <span>Posters</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Display Surface (Target of FLIP Animation) -->
+    <div id="resultsContainer">
+      <!-- Populated via JavaScript: dense table or poster grid -->
+    </div>
+
+    <!-- Pagination / Load More Tray -->
+    <div class="load-more-tray" id="loadMoreTray">
+      <button class="btn-secondary" id="loadMoreBtn">
+        <span>Load more films (+24)</span>
+      </button>
+      <div class="load-status-text" id="paginationStatus">
+        Showing 1–24 of 120 films
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        AudienceLens — Ranked by audience votes.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script type="module">
+    import { loadMovies, wishlist } from './js/store.js';
+    import { rankAll } from './js/ranking.js';
+    import { mergeSort } from './algorithms.js';
+
+    // Application State
+    let allMovies = [];
+    let filteredMovies = [];
+    let displayedMovies = [];
+    
+    let currentView = 'table'; // 'table' | 'grid'
+    let currentSortKey = 'score';
+    let currentSortOrder = 'desc';
+    const currentAlgorithm = 'mergesort'; // Always merge sort behind scenes
+    let selectedGenres = new Set();
+    let currentSearchQuery = '';
+    let currentMinYear = 1920;
+    let currentMaxYear = 2024;
+    let currentMinRating = 0.0;
+    let pageSize = 24;
+    let currentLimit = 24;
+
+    // DOM Elements
+    const searchInput = document.getElementById('searchInput');
+    const genreChipsContainer = document.getElementById('genreChipsContainer');
+    const genreSelectedCount = document.getElementById('genreSelectedCount');
+    const yearMinInput = document.getElementById('yearMin');
+    const yearMaxInput = document.getElementById('yearMax');
+    const yearLabel = document.getElementById('yearLabel');
+    const ratingMinInput = document.getElementById('ratingMin');
+    const ratingLabel = document.getElementById('ratingLabel');
+    const sortKeySelect = document.getElementById('sortKey');
+    const orderToggleBtn = document.getElementById('orderToggleBtn');
+    const orderLabel = document.getElementById('orderLabel');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const liveHeaderCount = document.getElementById('liveHeaderCount');
+    const matchingCountText = document.getElementById('matchingCountText');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const viewTableBtn = document.getElementById('viewTableBtn');
+    const viewGridBtn = document.getElementById('viewGridBtn');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadMoreTray = document.getElementById('loadMoreTray');
+    const paginationStatus = document.getElementById('paginationStatus');
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const mobileNavDrawer = document.getElementById('mobileNavDrawer');
+
+    // Mobile nav toggle setup
+    if (mobileNavToggle && mobileNavDrawer) {
+      mobileNavToggle.addEventListener('click', () => {
+        const isOpen = mobileNavToggle.classList.toggle('open');
+        mobileNavDrawer.classList.toggle('open', isOpen);
+        mobileNavToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+
+    /**
+     * Initializes genre chips from dataset.
+     */
+    function setupGenreChips(movies) {
+      const genreSet = new Set();
+      movies.forEach(m => {
+        if (Array.isArray(m.genres)) {
+          m.genres.forEach(g => genreSet.add(g));
+        } else if (Array.isArray(m.genre)) {
+          m.genre.forEach(g => genreSet.add(g));
+        }
+      });
+
+      const sortedGenres = mergeSort(Array.from(genreSet), (a, b) => a.localeCompare(b), 'asc').sorted;
+      genreChipsContainer.innerHTML = '';
+
+      sortedGenres.forEach(genre => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'genre-chip';
+        // Normal capitalization
+        btn.textContent = genre;
+        btn.dataset.genre = genre;
+        btn.addEventListener('click', () => {
+          if (selectedGenres.has(genre)) {
+            selectedGenres.delete(genre);
+            btn.classList.remove('active');
+          } else {
+            selectedGenres.add(genre);
+            btn.classList.add('active');
+          }
+          updateGenreCountText();
+          currentLimit = pageSize;
+          applyFiltersAndSort({ isSortOnly: false });
+        });
+        genreChipsContainer.appendChild(btn);
+      });
+    }
+
+    function updateGenreCountText() {
+      if (selectedGenres.size > 1) {
+        genreSelectedCount.textContent = `(${selectedGenres.size} selected)`;
+      } else if (selectedGenres.size === 1) {
+        genreSelectedCount.textContent = '(1 selected)';
+      } else {
+        genreSelectedCount.textContent = '';
+      }
+    }
+
+    /**
+     * Core Filter & Sort Pipeline with FLIP transition.
+     */
+    function applyFiltersAndSort({ isSortOnly = false } = {}) {
+      // 1. Filtering pass
+      filteredMovies = allMovies.filter(m => {
+        // Search query
+        if (currentSearchQuery) {
+          const q = currentSearchQuery.toLowerCase();
+          const matchTitle = (m.title || '').toLowerCase().includes(q);
+          const matchDir = (m.director || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchDir) return false;
+        }
+
+        // Year range
+        const y = Number(m.year) || 0;
+        if (y < currentMinYear || y > currentMaxYear) return false;
+
+        // Min rating
+        const r = Number(m.rating) || 0;
+        if (r < currentMinRating) return false;
+
+        // Genre multi-select
+        if (selectedGenres.size > 0) {
+          const movieGenres = m.genres || m.genre || [];
+          const hasSelected = Array.from(selectedGenres).some(g => movieGenres.includes(g));
+          if (!hasSelected) return false;
+        }
+
+        return true;
+      });
+
+      // Update Live Header Count & Result count
+      const count = filteredMovies.length;
+      if (count === allMovies.length) {
+        liveHeaderCount.textContent = `${count} films worth your evening.`;
+      } else {
+        liveHeaderCount.textContent = `${count} films match your filters.`;
+      }
+      matchingCountText.textContent = `Showing ${count} films`;
+
+      // 2. Sorting pass using ranking.js wrapper (always mergesort)
+      const sortResult = rankAll(filteredMovies, currentSortKey, currentSortOrder, currentAlgorithm);
+      const sortedMovies = sortResult.results;
+
+      // 3. Slice for pagination
+      displayedMovies = sortedMovies.slice(0, currentLimit);
+
+      // 4. Render with FLIP if sort only and container already has items
+      if (isSortOnly && resultsContainer.children.length > 0) {
+        renderWithFLIP(displayedMovies);
+      } else {
+        renderResults(displayedMovies);
+      }
+
+      // Update pagination controls
+      updatePaginationControls(count);
+    }
+
+    /**
+     * Renders items into resultsContainer with FLIP animation (~250ms).
+     */
+    function renderWithFLIP(movies) {
+      // 1. FIRST: record initial positions
+      const firstPositions = new Map();
+      const existingElements = resultsContainer.querySelectorAll('[data-movie-id]');
+      existingElements.forEach(el => {
+        const id = el.dataset.movieId;
+        if (id) {
+          firstPositions.set(id, el.getBoundingClientRect());
+        }
+      });
+
+      // Render updated DOM
+      renderResults(movies);
+
+      // 2. LAST, INVERT, PLAY
+      const newElements = resultsContainer.querySelectorAll('[data-movie-id]');
+      newElements.forEach(el => {
+        const id = el.dataset.movieId;
+        if (id && firstPositions.has(id)) {
+          const first = firstPositions.get(id);
+          const last = el.getBoundingClientRect();
+          const deltaX = first.left - last.left;
+          const deltaY = first.top - last.top;
+
+          if (deltaX !== 0 || deltaY !== 0) {
+            // Invert
+            el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            el.style.transition = 'none';
+
+            // Play
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                el.style.transition = 'transform 250ms cubic-bezier(0.2, 0, 0, 1)';
+                el.style.transform = '';
+
+                const onEnd = () => {
+                  el.style.transition = '';
+                  el.removeEventListener('transitionend', onEnd);
+                };
+                el.addEventListener('transitionend', onEnd);
+              });
+            });
+          }
+        }
+      });
+    }
+
+    /**
+     * Renders results into the DOM (Table or Poster Grid or Empty State).
+     */
+    function renderResults(movies) {
+      resultsContainer.innerHTML = '';
+
+      // Empty State
+      if (movies.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="empty-archive-state" role="status">
+            <div class="eyebrow eyebrow-accent">NO FILMS FOUND</div>
+            <h2 style="font-size: var(--text-2xl); color: var(--color-paper); margin: 4px 0 8px 0;">
+              No films match your current filters.
+            </h2>
+            <p style="font-size: var(--text-sm); line-height: var(--leading-relaxed); color: var(--color-paper-muted); margin: 0 0 var(--space-3) 0;">
+              Try expanding your year range, lowering the minimum rating, or clearing your search term to see more of the collection.
+            </p>
+            <div>
+              <button class="btn-primary" id="emptyResetBtn">
+                <span>Clear filters</span>
+              </button>
+            </div>
+          </div>
+        `;
+        document.getElementById('emptyResetBtn')?.addEventListener('click', resetAllFilters);
+        loadMoreTray.style.display = 'none';
+        return;
+      }
+
+      loadMoreTray.style.display = 'flex';
+
+      const wishlistItems = wishlist.getAll();
+      const wishlistMovieIds = new Set(wishlistItems.map(item => item.movieId || item.id));
+
+      if (currentView === 'table') {
+        renderTableView(movies, wishlistMovieIds);
+      } else {
+        renderGridView(movies, wishlistMovieIds);
+      }
+    }
+
+    /**
+     * Format genres with normal capitalization (e.g. Crime, Drama)
+     */
+    function formatGenres(genresArray) {
+      if (!genresArray || genresArray.length === 0) return 'Film';
+      return genresArray.slice(0, 2).map(g => g.charAt(0).toUpperCase() + g.slice(1).toLowerCase()).join(', ');
+    }
+
+    /**
+     * Renders List (Dense Table) View.
+     */
+    function renderTableView(movies, wishlistMovieIds) {
+      const tableWrapper = document.createElement('div');
+      tableWrapper.className = 'dense-table-wrapper';
+
+      const table = document.createElement('table');
+      table.className = 'dense-catalogue-table';
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th style="width: 50px;">Rank</th>
+            <th>Title</th>
+            <th style="width: 80px;">Year</th>
+            <th>Genre</th>
+            <th style="text-align: right; width: 90px;">Rating</th>
+            <th style="text-align: right; width: 110px;">Wishlist</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      `;
+
+      const tbody = table.querySelector('#tableBody');
+
+      movies.forEach((m, idx) => {
+        const inWishlist = wishlistMovieIds.has(m.id);
+        const genresList = formatGenres(m.genres || m.genre || []);
+
+        const tr = document.createElement('tr');
+        tr.dataset.movieId = m.id;
+        tr.innerHTML = `
+          <td class="dense-rank">#${String(idx + 1).padStart(2, '0')}</td>
+          <td>
+            <div class="dense-title-wrap">
+              <span class="dense-title">${m.title}</span>
+              <span class="dense-director">${m.director} &bull; ${m.runtime} min</span>
+            </div>
+          </td>
+          <td class="font-mono">${m.year}</td>
+          <td><span class="badge" style="font-size: 11px;">${genresList}</span></td>
+          <td class="font-mono" style="text-align: right; color: var(--color-accent); font-weight: 700;">
+            ${Number(m.rating).toFixed(1)} &#9733;
+          </td>
+          <td style="text-align: right;">
+            <button 
+              type="button" 
+              class="btn-wishlist ${inWishlist ? 'in-wishlist' : ''}" 
+              data-movie-id="${m.id}"
+              aria-label="${inWishlist ? 'Remove from saved' : 'Save film'}"
+            >
+              ${inWishlist ? '&check; Saved' : '+ Save'}
+            </button>
+          </td>
+        `;
+
+        // Wishlist button click handler
+        const btn = tr.querySelector('.btn-wishlist');
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleMovieWishlist(m, btn);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      tableWrapper.appendChild(table);
+      resultsContainer.appendChild(tableWrapper);
+    }
+
+    /**
+     * Renders Poster Grid View.
+     */
+    function renderGridView(movies, wishlistMovieIds) {
+      const grid = document.createElement('div');
+      grid.className = 'poster-grid-layout';
+
+      movies.forEach((m, idx) => {
+        const inWishlist = wishlistMovieIds.has(m.id);
+        const genresList = formatGenres(m.genres || m.genre || []);
+        const isFeatured = idx === 0;
+
+        const card = document.createElement('article');
+        card.className = `ticket-card ${isFeatured ? 'card-featured' : ''}`;
+        card.dataset.movieId = m.id;
+
+        if (isFeatured) {
+          // Featured First Card: clean two-column layout without duplicate title or synopsis
+          card.innerHTML = `
+            <div class="ticket-poster-wrap">
+              <div class="poster-placeholder-panel">
+                <div class="poster-badge-topleft">
+                  <span class="badge badge-amber font-mono">#01</span>
+                </div>
+                <div class="poster-badge-topright">
+                  <span class="badge font-mono badge-rating">${Number(m.rating).toFixed(1)} &#9733;</span>
+                </div>
+                <div class="poster-placeholder-center">
+                  <div class="poster-placeholder-meta" style="font-size: var(--text-sm); font-weight: 600; color: var(--color-paper-muted);">
+                    ${m.year} &bull; ${genresList}
+                  </div>
+                  <div class="font-mono" style="font-size: 11px; color: var(--color-paper-dim); margin-top: 4px;">
+                    ${m.runtime} min
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="featured-info-col">
+              <div>
+                <div class="eyebrow eyebrow-accent" style="font-size: 10px; margin-bottom: 6px;">TOP RATED FILM</div>
+                <h2 style="font-family: var(--font-serif); font-size: var(--text-2xl); color: var(--color-paper); margin: 0 0 6px 0;">
+                  ${m.title}
+                </h2>
+                <div style="font-size: var(--text-sm); color: var(--color-paper-muted);">
+                  Directed by ${m.director} &bull; ${m.year}
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: var(--border-subtle); padding-top: var(--space-3);">
+                <div>
+                  <div class="label-mono" style="font-size: 9px; color: var(--color-paper-dim);">AUDIENCE RATING</div>
+                  <div class="font-mono" style="font-size: var(--text-xl); font-weight: 700; color: var(--color-accent);">
+                    ${Number(m.rating).toFixed(1)} &#9733;
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  class="btn-wishlist ${inWishlist ? 'in-wishlist' : ''}" 
+                  data-movie-id="${m.id}"
+                  aria-label="${inWishlist ? 'Remove from saved' : 'Save film'}"
+                >
+                  ${inWishlist ? '&check; Saved' : '+ Save'}
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Standard Poster Cards
+          card.innerHTML = `
+            <div class="ticket-poster-wrap">
+              <div class="poster-placeholder-panel">
+                <div class="poster-badge-topleft">
+                  <span class="badge badge-amber font-mono">#${String(idx + 1).padStart(2, '0')}</span>
+                </div>
+                <div class="poster-badge-topright">
+                  <span class="badge font-mono badge-rating">${Number(m.rating).toFixed(1)} &#9733;</span>
+                </div>
+                <div class="poster-placeholder-center">
+                  <div class="poster-placeholder-title">${m.title}</div>
+                  <div class="poster-placeholder-meta">${m.year} &bull; ${genresList}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Perforated Tear-Line -->
+            <div class="ticket-perforation" aria-hidden="true">
+              <div class="notch-left"></div>
+              <div class="notch-right"></div>
+            </div>
+
+            <!-- Ticket Stub -->
+            <div class="ticket-stub">
+              <div style="display: flex; flex-direction: column; overflow: hidden; gap: 2px;">
+                <span class="font-mono" style="font-size: 11px; color: var(--color-paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${m.director}
+                </span>
+                <span class="font-mono" style="font-size: 10px; color: var(--color-paper-dim);">${m.runtime} min</span>
+              </div>
+
+              <button 
+                type="button" 
+                class="btn-wishlist ${inWishlist ? 'in-wishlist' : ''}" 
+                data-movie-id="${m.id}"
+                aria-label="${inWishlist ? 'Remove from saved' : 'Save film'}"
+              >
+                ${inWishlist ? '&check; Saved' : '+ Save'}
+              </button>
+            </div>
+          `;
+        }
+
+        const btn = card.querySelector('.btn-wishlist');
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleMovieWishlist(m, btn);
+        });
+
+        grid.appendChild(card);
+      });
+
+      resultsContainer.appendChild(grid);
+    }
+
+    /**
+     * Wishlist toggle writing through store.js
+     */
+    function toggleMovieWishlist(movie, btnEl) {
+      const items = wishlist.getAll();
+      const existing = items.find(it => it.movieId === movie.id || it.id === movie.id);
+
+      if (existing) {
+        wishlist.remove(existing.id);
+        btnEl.classList.remove('in-wishlist');
+        btnEl.innerHTML = '+ Save';
+        btnEl.setAttribute('aria-label', 'Save film');
+      } else {
+        wishlist.add(movie, 3);
+        btnEl.classList.add('in-wishlist');
+        btnEl.innerHTML = '&check; Saved';
+        btnEl.setAttribute('aria-label', 'Remove from saved');
+      }
+    }
+
+    /**
+     * Updates pagination status label and load more button visibility.
+     */
+    function updatePaginationControls(totalMatching) {
+      if (totalMatching === 0) {
+        loadMoreTray.style.display = 'none';
+        return;
+      }
+
+      loadMoreTray.style.display = 'flex';
+      const visibleCount = Math.min(currentLimit, totalMatching);
+      paginationStatus.textContent = `Showing 1–${visibleCount} of ${totalMatching} films`;
+
+      if (visibleCount >= totalMatching) {
+        loadMoreBtn.style.display = 'none';
+      } else {
+        loadMoreBtn.style.display = 'inline-flex';
+        loadMoreBtn.querySelector('span').textContent = `Load more films (+${Math.min(pageSize, totalMatching - visibleCount)})`;
+      }
+    }
+
+    /**
+     * Reset all filter parameters back to defaults.
+     */
+    function resetAllFilters() {
+      currentSearchQuery = '';
+      searchInput.value = '';
+      currentMinYear = 1920;
+      currentMaxYear = 2024;
+      yearMinInput.value = 1920;
+      yearMaxInput.value = 2024;
+      yearLabel.textContent = '1920 – 2024';
+      currentMinRating = 0.0;
+      ratingMinInput.value = 0;
+      ratingLabel.textContent = '≥ 0.0 ★';
+      currentSortKey = 'score';
+      sortKeySelect.value = 'score';
+      currentSortOrder = 'desc';
+      orderLabel.innerHTML = 'Highest first &darr;';
+      selectedGenres.clear();
+      document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+      updateGenreCountText();
+      currentLimit = pageSize;
+
+      applyFiltersAndSort({ isSortOnly: false });
+    }
+
+    // Event Listeners for Filters
+    searchInput.addEventListener('input', (e) => {
+      currentSearchQuery = e.target.value.trim();
+      currentLimit = pageSize;
+      applyFiltersAndSort({ isSortOnly: false });
+    });
+
+    yearMinInput.addEventListener('change', (e) => {
+      currentMinYear = Math.max(1920, Math.min(2024, Number(e.target.value) || 1920));
+      yearLabel.textContent = `${currentMinYear} – ${currentMaxYear}`;
+      currentLimit = pageSize;
+      applyFiltersAndSort({ isSortOnly: false });
+    });
+
+    yearMaxInput.addEventListener('change', (e) => {
+      currentMaxYear = Math.max(1920, Math.min(2024, Number(e.target.value) || 2024));
+      yearLabel.textContent = `${currentMinYear} – ${currentMaxYear}`;
+      currentLimit = pageSize;
+      applyFiltersAndSort({ isSortOnly: false });
+    });
+
+    ratingMinInput.addEventListener('input', (e) => {
+      currentMinRating = Number(e.target.value) || 0;
+      ratingLabel.textContent = `≥ ${currentMinRating.toFixed(1)} ★`;
+      currentLimit = pageSize;
+      applyFiltersAndSort({ isSortOnly: false });
+    });
+
+    sortKeySelect.addEventListener('change', (e) => {
+      currentSortKey = e.target.value;
+      applyFiltersAndSort({ isSortOnly: true });
+    });
+
+    orderToggleBtn.addEventListener('click', () => {
+      currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+      orderLabel.innerHTML = currentSortOrder === 'desc' ? 'Highest first &darr;' : 'Lowest first &uarr;';
+      applyFiltersAndSort({ isSortOnly: true });
+    });
+
+    resetFiltersBtn.addEventListener('click', resetAllFilters);
+
+    // View toggles
+    viewTableBtn.addEventListener('click', () => {
+      if (currentView === 'table') return;
+      currentView = 'table';
+      viewTableBtn.classList.add('active');
+      viewTableBtn.setAttribute('aria-checked', 'true');
+      viewGridBtn.classList.remove('active');
+      viewGridBtn.setAttribute('aria-checked', 'false');
+      renderResults(displayedMovies);
+    });
+
+    viewGridBtn.addEventListener('click', () => {
+      if (currentView === 'grid') return;
+      currentView = 'grid';
+      viewGridBtn.classList.add('active');
+      viewGridBtn.setAttribute('aria-checked', 'true');
+      viewTableBtn.classList.remove('active');
+      viewTableBtn.setAttribute('aria-checked', 'false');
+      renderResults(displayedMovies);
+    });
+
+    // Pagination: Load More
+    loadMoreBtn.addEventListener('click', () => {
+      currentLimit += pageSize;
+      displayedMovies = filteredMovies.slice(0, currentLimit);
+      renderResults(displayedMovies);
+      updatePaginationControls(filteredMovies.length);
+    });
+
+    // Bootstrapping
+    async function init() {
+      try {
+        const { movies } = await loadMovies('./data/movies.json');
+        allMovies = movies;
+        filteredMovies = [...allMovies];
+        setupGenreChips(allMovies);
+        applyFiltersAndSort({ isSortOnly: false });
+      } catch (err) {
+        resultsContainer.innerHTML = `
+          <div class="empty-archive-state" role="alert">
+            <div class="eyebrow eyebrow-accent">ERROR</div>
+            <h2 style="color: var(--color-danger);">Failed to load films</h2>
+            <p>${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
